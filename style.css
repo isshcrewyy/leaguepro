@@ -1,0 +1,114 @@
+/* General body styling to ensure full visibility */
+body {
+    font-family: 'Lexend', 'Noto Sans', sans-serif;
+    background-color: #f8fafc;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header styling */
+header {
+    width: 100%; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: #fff; 
+    border-bottom: 1px solid #e7edf4;
+}
+
+.home-button {
+    color: #0d141c;
+    font-size: 1.5em;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.quote {
+    font-size: 2em; 
+    color: #0d141c; 
+    position: absolute;  /* Ensure it's positioned relative to the header */
+    left: 50%;           /* Center horizontally */
+    transform: translateX(-50%);  /* Shift back by 50% of its own width */
+    top: 80px;           /* Adjust the distance from the header */
+    text-align: center;  /* Ensure text is centered */
+    white-space: nowrap; /* Prevent it from breaking into multiple lines */
+}
+
+
+/* Container styling */
+.container {
+    flex: 1; /* Ensures container takes available space */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px 20px;
+    box-sizing: border-box;
+    background-color: #fff;
+    margin: auto;
+}
+
+/* Image styling */
+.container img {
+    width: 80%;
+    max-width: 400px; /* Make sure the image doesn't get too big */
+    height: auto;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+/* Heading styling */
+h1 {
+    font-size: 2.5em;
+    margin: 20px 0;
+    color: #0d141c;
+    text-align: center;
+}
+
+/* Button containers */
+.button-container-1,
+.button-container-2 {
+    margin-top: 10px;
+}
+
+/* Fans Button */
+.fans-button {
+    padding: 15px 30px;
+    background-color: #0d78f2;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.fans-button:hover {
+    background-color: #0b62d3;
+}
+
+/* Organizer Button */
+.organizer-button {
+    padding: 15px 30px;
+    background-color: red;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.organizer-button:hover {
+    background-color: #d32f2f;
+}
+
+/* Ensure body doesn't cut off content */
+html, body {
+    height: 100%;
+    overflow: auto;
+}
