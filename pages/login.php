@@ -1,5 +1,4 @@
 <?php
-
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -29,21 +28,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    $stmt = $conn->prepare("SELECT userId, password FROM user WHERE email = ?");
+    $stmt = $conn->prepare("SELECT userId, name, password FROM user WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $stmt->store_result();
 
     if ($stmt->num_rows > 0) {
-        $stmt->bind_result($userId, $hashed_password);
+        $stmt->bind_result($userId, $name, $hashed_password);
         $stmt->fetch();
 
+        // Debugging output
+        echo "Fetched User ID: $userId, Name: $name<br>";
+
         if (password_verify($password, $hashed_password)) {
-            $_SESSION['organizer_id'] = $userId;
+            $_SESSION['organizer_id'] = $userId; // Store user ID in session
+            $_SESSION['username'] = $name; // Store user name in session
+
+            // Debugging output
+            print_r($_SESSION); // Show session before redirection
 
             // Check if "Remember Me" was selected
             if (isset($_POST['remember_me'])) {
-                // Set a cookie to expire in 30 days
                 setcookie("organizer_id", $userId, time() + (30 * 24 * 60 * 60), "/"); // 30 days
             }
 
@@ -67,7 +72,7 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Organizer Login</title>
-    <link rel="stylesheet" href="loginstyle.css">
+    <link rel="stylesheet" href="../assests/css/loginstyle.css">
 </head>
 <body> 
     <div class="container">
