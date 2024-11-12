@@ -1,73 +1,83 @@
-* {
+/* Position LeaguePro button in the top-left corner */
+.button-container-3 {
+    position: absolute; /* Allows positioning relative to the page */
+    top: 10px; /* Adjust for desired spacing from the top */
+    left: 10px; /* Adjust for desired spacing from the left */
     margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
 }
 
-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f5f5f5;
+.button-container-3 button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50; /* Set button background color */
+    color: white; /* Set button text color */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
+.button-container-3 button:hover {
+    background-color: #45a049; /* Button hover effect */
+}
+
+/* Additional styling for the login form */
 .container {
-    width: 300px;
+    max-width: 400px;
+    margin: 100px auto; /* Centers the container on the page */
     padding: 20px;
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
 }
 
-h1 {
-    font-size: 24px;
-    color: #333;
+.container h1 {
+    text-align: center;
     margin-bottom: 20px;
-    text-align: center;
 }
 
-.message {
-    background-color: #ffdddd;
-    color: #d8000c;
-    padding: 10px;
-    margin-bottom: 15px;
-    border-radius: 4px;
-    text-align: center;
+.container label {
+    display: block;
+    margin: 10px 0 5px;
 }
 
-form {
-    display: flex;
-    flex-direction: column;
-}
-
-label {
-    font-size: 14px;
-    color: #333;
-    margin-bottom: 5px;
-}
-
-input[type="email"],
-input[type="password"] {
+.container input[type="email"],
+.container input[type="password"] {
+    width: 100%;
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
+    border-radius: 5px;
 }
 
-button {
+.container input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+.container button[type="submit"] {
+    width: 100%;
     padding: 10px;
     font-size: 16px;
-    color: #ffffff;
     background-color: #4CAF50;
+    color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s;
 }
 
-button:hover {
+.container button[type="submit"]:hover {
     background-color: #45a049;
+}
+
+.register-prompt {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.register-prompt a {
+    color: #4CAF50;
+    text-decoration: none;
+}
+
+.register-prompt a:hover {
+    text-decoration: underline;
 }

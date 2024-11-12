@@ -40,9 +40,9 @@ while ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
-// Fetch leaderboard for the selected league
+// Fetch leaderboard data
 $leaderboard = [];
-$leaderboardQuery = "SELECT club.name AS club_name, leaderboard.points, leaderboard.wins, leaderboard.losses, leaderboard.draws, leaderboard.goal_difference 
+$leaderboardQuery = "SELECT club.name AS club_name, leaderboard.points, leaderboard.wins, leaderboard.losses, leaderboard.draws, leaderboard.goal_difference
                      FROM leaderboard 
                      JOIN club ON leaderboard.club_id = club.club_id 
                      WHERE leaderboard.league_id = ?";
@@ -50,13 +50,8 @@ $stmt = $conn->prepare($leaderboardQuery);
 $stmt->bind_param("i", $league_id);
 $stmt->execute();
 $result = $stmt->get_result();
-
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $leaderboard[] = $row;
-    }
-} else {
-    echo "<p>No leaderboard data found for this league.</p>";
+while ($row = $result->fetch_assoc()) {
+    $leaderboard[] = $row;
 }
 $stmt->close();
 
@@ -102,31 +97,30 @@ $conn->close();
         </ul>
 
         <h2>Leaderboard</h2>
-<?php if (!empty($leaderboard)): ?>
-    <table>
-        <tr>
-            <th>Club</th>
-            <th>Points</th>
-            <th>Wins</th>
-            <th>Losses</th>
-            <th>Draws</th>
-            <th>Goal Difference</th>
-        </tr>
-        <?php foreach ($leaderboard as $entry): ?>
-            <tr>
-                <td><?php echo htmlspecialchars($entry['club_name']); ?></td>
-                <td><?php echo htmlspecialchars($entry['points']); ?></td>
-                <td><?php echo htmlspecialchars($entry['wins']); ?></td>
-                <td><?php echo htmlspecialchars($entry['losses']); ?></td>
-                <td><?php echo htmlspecialchars($entry['draws']); ?></td>
-                <td><?php echo htmlspecialchars($entry['goal_difference']); ?></td>
-            </tr>
-        <?php endforeach; ?>
-    </table>
-<?php else: ?>
-    <p>No leaderboard data available for this league.</p>
-<?php endif; ?>
-
+        <?php if (!empty($leaderboard)): ?>
+            <table>
+                <tr>
+                    <th>Club</th>
+                    <th>Points</th>
+                    <th>Wins</th>
+                    <th>Losses</th>
+                    <th>Draws</th>
+                    <th>Goal Difference</th>
+                </tr>
+                <?php foreach ($leaderboard as $entry): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($entry['club_name']); ?></td>
+                        <td><?php echo htmlspecialchars($entry['points']); ?></td>
+                        <td><?php echo htmlspecialchars($entry['wins']); ?></td>
+                        <td><?php echo htmlspecialchars($entry['losses']); ?></td>
+                        <td><?php echo htmlspecialchars($entry['draws']); ?></td>
+                        <td><?php echo htmlspecialchars($entry['goal_difference']); ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </table>
+        <?php else: ?>
+            <p>No leaderboard data available for this league.</p>
+        <?php endif; ?>
 
         <h2>Players</h2>
         <?php foreach ($players as $clubName => $clubPlayers): ?>

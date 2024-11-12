@@ -75,6 +75,12 @@ $conn->close();
     <link rel="stylesheet" href="../assests/css/loginstyle.css">
 </head>
 <body> 
+<div class="button-container-3">
+            
+            <button  onclick="window.location.href='index.php'">LeaguePro</button>
+           
+        </div>
+        
     <div class="container">
         <h1>Organizer Login</h1>
         <?php if ($message): ?>
@@ -82,7 +88,7 @@ $conn->close();
                 <?php echo $message; ?>
             </div>
         <?php endif; ?>
-        <form method="POST" autocomplete="off">
+        <form method="POST" >
             <label for="email">Email</label>
             <input type="email" name="email" required>
 
