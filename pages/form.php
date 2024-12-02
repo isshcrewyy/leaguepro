@@ -3,15 +3,15 @@ session_start();
 
 // Check if the user is logged in
 if (!isset($_SESSION['organizer_id'])) {
-    header("Location: login.php"); // Redirect to login if not logged in
+    header("Location: login.php"); 
     exit();
 }
 
-// Database connection
+//  connection
 $host = "localhost";
-$user = "your_username"; // Change to your database username
-$password = "your_password"; // Change to your database password
-$dbname = "leaguedb"; // Change to your database name
+$user = "your_username"; 
+$password = "your_password"; 
+$dbname = "leaguedb";
 
 $conn = new mysqli($host, $user, $password, $dbname);
 
@@ -19,7 +19,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Handle form submissions
+//  form submissions
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $table = $_POST['table'];
 
@@ -112,7 +112,7 @@ $conn->close();
     <script>
         function showForm(entity) {
             const formFields = document.getElementById('formFields');
-            formFields.innerHTML = ''; // Clear previous fields
+            formFields.innerHTML = ''; 
 
             if (entity === 'club') {
                 formFields.innerHTML = `

@@ -5,7 +5,7 @@ error_reporting(E_ALL);
 
 session_start();
 
-if (isset($_SESSION['organizer_id'])) {
+if (isset($_SESSION['userId'])) {
     echo "Redirecting to dashboard...";
     header("Location: org_dashboard.php");
     exit();
@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo "Fetched User ID: $userId, Name: $name<br>";
 
         if (password_verify($password, $hashed_password)) {
-            $_SESSION['organizer_id'] = $userId; // Store user ID in session
+            $_SESSION['userId'] = $userId; // Store user ID in session
             $_SESSION['username'] = $name; // Store user name in session
 
             // Debugging output
@@ -49,7 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             // Check if "Remember Me" was selected
             if (isset($_POST['remember_me'])) {
-                setcookie("organizer_id", $userId, time() + (30 * 24 * 60 * 60), "/"); // 30 days
+                setcookie("userId", $userId, time() + (30 * 24 * 60 * 60), "/"); // 30 days
             }
 
             header("Location: org_dashboard.php");
@@ -95,9 +95,7 @@ $conn->close();
             <label for="password">Password</label>
             <input type="password" name="password" required>
 
-            <label for="remember_me">
-                <input type="checkbox" name="remember_me" value="1"> Remember Me
-            </label>
+           
 
             <button type="submit">Login</button>
             <p class="register-prompt">Don't have an account? <a href="registration.php">Register here</a></p>

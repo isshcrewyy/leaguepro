@@ -31,14 +31,20 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fans Page - Select a League</title>
-    <link rel="stylesheet" href="../assests/css/style.css">
+    <link rel="stylesheet" href="../assests/css/fanStyle.css">
 </head>
 <body>
+<div class="button-container-3">
+            
+            <button  onclick="window.location.href='index.php'">LeaguePro</button>
+           
+        </div>
     <header>
         <h1>Welcome, Fans! Choose a League</h1>
     </header>
 
     <div class="container">
+    
         <h2>Select a League to View Details</h2>
         <ul>
             <?php foreach ($leagues as $league): ?>

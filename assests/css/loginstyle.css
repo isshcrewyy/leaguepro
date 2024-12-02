@@ -1,29 +1,29 @@
 /* Position LeaguePro button in the top-left corner */
 .button-container-3 {
-    position: absolute; /* Allows positioning relative to the page */
-    top: 10px; /* Adjust for desired spacing from the top */
-    left: 10px; /* Adjust for desired spacing from the left */
+    position: absolute; 
+    top: 10px; 
+    left: 10px; 
     margin: 0;
 }
 
 .button-container-3 button {
     padding: 10px 20px;
     font-size: 16px;
-    background-color: #4CAF50; /* Set button background color */
-    color: white; /* Set button text color */
+    background-color: #4CAF50; 
+    color: white; 
     border: none;
     border-radius: 5px;
     cursor: pointer;
 }
 
 .button-container-3 button:hover {
-    background-color: #45a049; /* Button hover effect */
+    background-color: #45a049; 
 }
 
 /* Additional styling for the login form */
 .container {
     max-width: 400px;
-    margin: 100px auto; /* Centers the container on the page */
+    margin: 100px auto; 
     padding: 20px;
     border: 1px solid #ddd;
     border-radius: 5px;

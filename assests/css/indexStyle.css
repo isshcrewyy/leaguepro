@@ -1,0 +1,124 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Prevent scrolling */
+html, body {
+    height: 100%;
+    overflow: hidden; /* Disables scrolling */
+}
+
+/* Body and Background */
+body {
+    height: 100%;
+    background: #f4f6f8; /* Light gray background for contrast */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    position: relative;
+}
+
+/* Header Styling */
+header {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    color: #2c3e50; /* Dark text color */
+    z-index: 1;
+}
+
+header .home-button {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #3498db; /* Blue color */
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    background: rgba(52, 152, 219, 0.8); /* Light blue background */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s, transform 0.3s;
+}
+
+header .home-button:hover {
+    background: rgba(52, 152, 219, 1);
+    transform: scale(1.05);
+}
+
+/* Quote Styling */
+h2.quote {
+    font-size: 1.8rem;
+    font-weight: 500;
+    color: #34495e; /* Darker text color for contrast */
+    margin-top: 10px;
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Container for Buttons */
+.container {
+    text-align: center;
+    z-index: 1;
+    position: relative;
+    margin-top: 100px; /* Adjusted for better placement */
+}
+
+/* Background Image Styling */
+.bg-image {
+    width: 80%; /* Make the image smaller */
+    max-width: 600px;
+    margin-top: 50px;
+    border-radius: 15px; /* Smooth edges */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Soft shadow for a subtle effect */
+}
+
+/* Button Containers */
+.button-container-1, .button-container-2 {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+/* General Button Styling */
+.button-container-1 .fans-button, .button-container-2 .organizer-button {
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    background: linear-gradient(145deg, #3498db, #2980b9); /* Gradient effect */
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, filter 0.3s ease;
+    width: 180px;
+    text-transform: uppercase;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    outline: none;
+}
+
+/* Hover Effects for Buttons */
+.button-container-1 .fans-button:hover, .button-container-2 .organizer-button:hover {
+    background: linear-gradient(145deg, #2980b9, #3498db);
+    transform: translateY(-6px); /* Lift effect on hover */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Stronger shadow */
+    filter: brightness(1.1); /* Slightly brighten on hover */
+}
+
+/* Active Button State */
+.button-container-1 .fans-button:active, .button-container-2 .organizer-button:active {
+    transform: translateY(2px); /* Subtle push when clicked */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* Reduce shadow on click */
+}
+
+/* Focus State for Accessibility */
+.button-container-1 .fans-button:focus, .button-container-2 .organizer-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.5); /* Outline on focus for accessibility */
+}

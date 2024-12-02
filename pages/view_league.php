@@ -1,145 +1,173 @@
 <?php
 session_start();
 
-if (!isset($_GET['league_id'])) {
-    echo "No league ID provided in the URL.";
-    exit();
-}
-
-$league_id = $_GET['league_id'];
+// Database connection details
 $host = "localhost";
-$user = "root"; 
-$password = ""; 
-$dbname = "leaguedb"; 
+$user = "root";
+$password = "";
+$dbname = "leaguedb";
 
-// Establish the database connection
+// Connection
 $conn = new mysqli($host, $user, $password, $dbname);
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Fetch league details
-$leagueDetails = [];
-$leagueQuery = "SELECT league_name, season, start_date, end_date FROM league WHERE league_id = ?";
-$stmt = $conn->prepare($leagueQuery);
-$stmt->bind_param("i", $league_id);
-$stmt->execute();
-$leagueDetails = $stmt->get_result()->fetch_assoc();
-$stmt->close();
-
-// Fetch clubs in the selected league
+// Fetch Club Details
+$clubQuery = "SELECT * FROM club WHERE league_id = ?";
+$clubStmt = $conn->prepare($clubQuery);
+$clubStmt->bind_param("i", $_GET['league_id']); // assuming league_id is passed via GET
+$clubStmt->execute();
+$clubResult = $clubStmt->get_result();
 $clubs = [];
-$clubQuery = "SELECT club_id, name FROM club WHERE league_id = ?";
-$stmt = $conn->prepare($clubQuery);
-$stmt->bind_param("i", $league_id);
-$stmt->execute();
-$result = $stmt->get_result();
-while ($row = $result->fetch_assoc()) {
+while ($row = $clubResult->fetch_assoc()) {
     $clubs[] = $row;
 }
-$stmt->close();
+$clubStmt->close();
 
-// Fetch leaderboard data
+// Fetch Leaderboard Data
+$leaderboardQuery = "SELECT * FROM leaderboard WHERE league_id = ?";
+$leaderboardStmt = $conn->prepare($leaderboardQuery);
+$leaderboardStmt->bind_param("i", $_GET['league_id']);
+$leaderboardStmt->execute();
+$leaderboardResult = $leaderboardStmt->get_result();
 $leaderboard = [];
-$leaderboardQuery = "SELECT club.name AS club_name, leaderboard.points, leaderboard.wins, leaderboard.losses, leaderboard.draws, leaderboard.goal_difference
-                     FROM leaderboard 
-                     JOIN club ON leaderboard.club_id = club.club_id 
-                     WHERE leaderboard.league_id = ?";
-$stmt = $conn->prepare($leaderboardQuery);
-$stmt->bind_param("i", $league_id);
-$stmt->execute();
-$result = $stmt->get_result();
-while ($row = $result->fetch_assoc()) {
+while ($row = $leaderboardResult->fetch_assoc()) {
     $leaderboard[] = $row;
 }
-$stmt->close();
+$leaderboardStmt->close();
 
-// Fetch players for each club in the league
+// Fetch Players Data
 $players = [];
 foreach ($clubs as $club) {
-    $club_id = $club['club_id'];
-    $playerQuery = "SELECT name, age, position FROM player WHERE club_id = ?";
-    $stmt = $conn->prepare($playerQuery);
-    $stmt->bind_param("i", $club_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    while ($row = $result->fetch_assoc()) {
-        $players[$club['name']][] = $row;
+    $playerQuery = "SELECT * FROM player WHERE club_id = ?";
+    $playerStmt = $conn->prepare($playerQuery);
+    $playerStmt->bind_param("i", $club['club_id']);
+    $playerStmt->execute();
+    $playerResult = $playerStmt->get_result();
+    while ($row = $playerResult->fetch_assoc()) {
+        $players[$club['club_id']][] = $row;
     }
-    $stmt->close();
+    $playerStmt->close();
 }
 
 $conn->close();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>League View</title>
+    <title>League Details</title>
     <link rel="stylesheet" href="../assests/css/style.css">
 </head>
 <body>
+<div class="button-container-3">
+            
+            <button  onclick="window.location.href='index.php'">LeaguePro</button>
+           
+        </div>
     <header>
-        <h1>League Details - <?php echo htmlspecialchars($leagueDetails['league_name']); ?></h1>
-        <p>Season: <?php echo htmlspecialchars($leagueDetails['season']); ?></p>
-        <p>Start Date: <?php echo htmlspecialchars($leagueDetails['start_date']); ?></p>
-        <p>End Date: <?php echo htmlspecialchars($leagueDetails['end_date']); ?></p>
+        <h1>League Details</h1>
+        
     </header>
 
     <div class="container">
         <h2>Clubs in this League</h2>
-        <ul>
+        <div class="card-container">
             <?php foreach ($clubs as $club): ?>
-                <li><?php echo htmlspecialchars($club['name']); ?></li>
+                <div class="card">
+                    <h3><?php echo htmlspecialchars($club['name']); ?></h3>
+                    <p>Location: <?php echo htmlspecialchars($club['location']); ?></p>
+                    <p>Founded: <?php echo htmlspecialchars($club['founded_year']); ?></p>
+                    <div class="button-group">
+                        <a href="view_league.php?league_id=<?php echo $_GET['league_id']; ?>&club_id=<?php echo $club['club_id']; ?>">View Players</a>
+                        <a href="view_league.php?league_id=<?php echo $_GET['league_id']; ?>&view=leaderboard">View Leaderboard</a>
+                    </div>
+                </div>
             <?php endforeach; ?>
-        </ul>
+        </div>
 
-        <h2>Leaderboard</h2>
-        <?php if (!empty($leaderboard)): ?>
-            <table>
-                <tr>
-                    <th>Club</th>
-                    <th>Points</th>
-                    <th>Wins</th>
-                    <th>Losses</th>
-                    <th>Draws</th>
-                    <th>Goal Difference</th>
-                </tr>
-                <?php foreach ($leaderboard as $entry): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($entry['club_name']); ?></td>
-                        <td><?php echo htmlspecialchars($entry['points']); ?></td>
-                        <td><?php echo htmlspecialchars($entry['wins']); ?></td>
-                        <td><?php echo htmlspecialchars($entry['losses']); ?></td>
-                        <td><?php echo htmlspecialchars($entry['draws']); ?></td>
-                        <td><?php echo htmlspecialchars($entry['goal_difference']); ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </table>
-        <?php else: ?>
-            <p>No leaderboard data available for this league.</p>
+        <?php if (isset($_GET['view']) && $_GET['view'] == 'leaderboard'): ?>
+            <h2>Leaderboard</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Club</th>
+                            <th>Points</th>
+                            <th>Wins</th>
+                            <th>Losses</th>
+                            <th>Draws</th>
+                            <th>Goal Difference</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($leaderboard as $entry): ?>
+                            <tr>
+                                <?php 
+                                    // Find club name by club_id
+                                    $clubName = '';
+                                    foreach ($clubs as $club) {
+                                        if ($club['club_id'] == $entry['club_id']) {
+                                            $clubName = $club['name'];
+                                            break;
+                                        }
+                                    }
+                                ?>
+                                <td><?php echo htmlspecialchars($clubName); ?></td>
+                                <td><?php echo htmlspecialchars($entry['points']); ?></td>
+                                <td><?php echo htmlspecialchars($entry['wins']); ?></td>
+                                <td><?php echo htmlspecialchars($entry['losses']); ?></td>
+                                <td><?php echo htmlspecialchars($entry['draws']); ?></td>
+                                <td><?php echo htmlspecialchars($entry['goal_difference']); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
         <?php endif; ?>
 
-        <h2>Players</h2>
-        <?php foreach ($players as $clubName => $clubPlayers): ?>
-            <h3><?php echo htmlspecialchars($clubName); ?></h3>
-            <table>
-                <tr>
-                    <th>Name</th>
-                    <th>Age</th>
-                    <th>Position</th>
-                </tr>
-                <?php foreach ($clubPlayers as $player): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($player['name']); ?></td>
-                        <td><?php echo htmlspecialchars($player['age']); ?></td>
-                        <td><?php echo htmlspecialchars($player['position']); ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </table>
-        <?php endforeach; ?>
+        <?php if (isset($_GET['club_id'])): ?>
+            <?php 
+                $clubName = '';
+                foreach ($clubs as $club) {
+                    if ($club['club_id'] == $_GET['club_id']) {
+                        $clubName = $club['name'];
+                        break;
+                    }
+                }
+            ?>
+            <h2>Players in <?php echo htmlspecialchars($clubName); ?></h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Position</th>
+                            <th>Phone</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (isset($players[$_GET['club_id']])): ?>
+                            <?php foreach ($players[$_GET['club_id']] as $player): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($player['name']); ?></td>
+                                    <td><?php echo htmlspecialchars($player['age']); ?></td>
+                                    <td><?php echo htmlspecialchars($player['position']); ?></td>
+                                    <td><?php echo htmlspecialchars($player['phone_number']); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr><td colspan="4">No players available for this club.</td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
     </div>
 </body>
 </html>

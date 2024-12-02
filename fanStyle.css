@@ -1,0 +1,99 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body Styling */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f4f7;
+    color: #333;
+    text-align: center;
+    padding: 40px;
+}
+
+/* Header Styling */
+header {
+    margin-bottom: 40px;
+}
+
+header h1 {
+    color: #2c3e50;
+    font-size: 2.5rem;
+}
+
+/* Container Styling */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Title Styling */
+h2 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    color: #3498db;
+}
+
+/* League List Styling */
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+ul li {
+    background-color: #ecf0f1;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin: 10px 0;
+    padding: 15px;
+    transition: background-color 0.3s ease;
+}
+
+ul li:hover {
+    background-color: #3498db;
+    color: #fff;
+}
+
+ul li a {
+    text-decoration: none;
+    color: #2c3e50;
+    font-size: 1.2rem;
+}
+
+ul li a:hover {
+    color: #fff;
+}
+
+/* Error Message Styling */
+p {
+    font-size: 1rem;
+    color: #e74c3c;
+    margin-top: 20px;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2rem;
+    }
+
+    .container {
+        padding: 15px;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    ul li {
+        padding: 10px;
+    }
+}
