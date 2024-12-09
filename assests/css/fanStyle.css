@@ -8,10 +8,32 @@
 /* Body Styling */
 body {
     font-family: 'Arial', sans-serif;
-    background-color: #f0f4f7;
+    background-color: #f7f9fc;
     color: #333;
     text-align: center;
-    padding: 40px;
+    padding: 20px;
+}
+
+/* Button Container for LeaguePro Button */
+.button-container-3 {
+    text-align: left;
+    margin-bottom: 20px;
+    padding: 10px;
+}
+
+.button-container-3 button {
+    background-color: #3498db;
+    color: #fff;
+    font-size: 1rem;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.button-container-3 button:hover {
+    background-color: #2980b9;
 }
 
 /* Header Styling */
@@ -22,6 +44,7 @@ header {
 header h1 {
     color: #2c3e50;
     font-size: 2.5rem;
+    margin-bottom: 20px;
 }
 
 /* Container Styling */
@@ -38,7 +61,7 @@ header h1 {
 h2 {
     font-size: 1.8rem;
     margin-bottom: 20px;
-    color: #3498db;
+    color: #34495e;
 }
 
 /* League List Styling */
@@ -72,13 +95,6 @@ ul li a:hover {
     color: #fff;
 }
 
-/* Error Message Styling */
-p {
-    font-size: 1rem;
-    color: #e74c3c;
-    margin-top: 20px;
-}
-
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
     header h1 {
@@ -95,5 +111,10 @@ p {
 
     ul li {
         padding: 10px;
+    }
+
+    .button-container-3 button {
+        font-size: 0.9rem;
+        padding: 8px 16px;
     }
 }

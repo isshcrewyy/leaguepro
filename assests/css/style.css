@@ -1,4 +1,4 @@
-/* Global Styles */
+/* General Styles */
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f9;
@@ -12,36 +12,88 @@ header {
     color: white;
     text-align: center;
     padding: 20px;
+    margin-bottom: 20px;
 }
 
-h1 {
+h1, h2 {
     margin: 0;
-    font-size: 2rem;
 }
 
-/* Container */
 .container {
     width: 90%;
     max-width: 1200px;
-    margin: 30px auto;
+    margin: auto;
+    padding: 20px;
+}
+
+/* Button Group (for View Leaderboard) */
+.button-group {
+    margin-top: 15px;
+}
+
+.button-group a {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.button-group a:hover {
+    background-color: #0056b3;
+}
+
+/* Match Sections */
+section {
+    margin-bottom: 40px;
+}
+
+.matches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.match-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    flex: 1 1 calc(33.333% - 20px); /* Responsive 3-column layout */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.match-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.match-card p {
+    margin: 5px 0;
+}
+
+.match-card strong {
+    color: #333;
 }
 
 /* Card Container (Clubs Section) */
 .card-container {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* This will create 3 equal columns */
+    grid-template-columns: repeat(3, 1fr); /* Default 3 columns */
     gap: 20px;
-    justify-items: center; /* Center the cards inside each grid item */
+    justify-items: center;
     margin-top: 30px;
 }
 
-/* Card Styling */
 .card {
     background-color: white;
     border: 1px solid #ddd;
     border-radius: 10px;
-    width: 100%; /* Make the card take full width inside the grid item */
     padding: 20px;
+    width: 100%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -61,29 +113,10 @@ h1 {
     margin-bottom: 10px;
 }
 
-/* Button Styling */
-.button-group {
-    margin-top: 15px;
-}
-
-.button-group a {
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: white;
-    border-radius: 5px;
-    text-decoration: none;
-    font-size: 1rem;
-    margin-right: 10px;
-    transition: background-color 0.3s ease;
-}
-
-.button-group a:hover {
-    background-color: #0056b3;
-}
-
-/* Table Styling */
+/* Table Styles */
 .table-container {
     margin-top: 30px;
+    overflow-x: auto; /* Enable horizontal scroll for smaller screens */
 }
 
 table {
@@ -111,14 +144,22 @@ table tr:hover {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .card-container {
-        grid-template-columns: repeat(2, 1fr); /* 2 columns on tablets */
+        grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
+    }
+
+    .match-card {
+        flex: 1 1 calc(50% - 20px); /* Adjust match card layout */
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
     .card-container {
-        grid-template-columns: 1fr; /* 1 column on mobile */
+        grid-template-columns: 1fr; /* Single column on smaller screens */
+    }
+
+    .match-card {
+        flex: 1 1 100%; /* Full width for match cards */
     }
 }

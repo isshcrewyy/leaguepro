@@ -48,9 +48,9 @@
             <label for="time">Time:</label>
             <input type="time" name="time" required>
             <label for="score_home">Home Score:</label>
-            <input type="text" name="score_home" required>
+            <input type="text" name="score_home" >
             <label for="score_away">Away Score:</label>
-            <input type="text" name="score_away" required>
+            <input type="text" name="score_away" >
             <input type="submit" value="Add Game">
         </form>
     </div>

@@ -44,15 +44,15 @@ if (isset($_GET['player_id'])) {
 
 // Handle form submission for updating player or coach
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action']) && $_POST['action'] == 'update') {
-    if (isset($_POST['player_name'])) {  // Update Player
-        $player_name = $_POST['player_name'];
+    if (isset($_POST['name'])) {  // Update Player
+        $name = $_POST['name'];
         $position = $_POST['position'];
         $club_id = $_POST['club_id'];
         $phone_number = $_POST['phone_number'];
 
         // Update player details
-        $stmt = $conn->prepare("UPDATE player SET player_name = ?, position = ?, club_id = ?, phone_number = ? WHERE player_id = ?");
-        $stmt->bind_param("ssisi", $player_name, $position, $club_id, $phone_number, $player_id);
+        $stmt = $conn->prepare("UPDATE player SET name = ?, position = ?, club_id = ?, phone_number = ? WHERE player_id = ?");
+        $stmt->bind_param("ssisi", $name, $position, $club_id, $phone_number, $player_id);
 
         if ($stmt->execute()) {
             echo '<script>alert("Player updated successfully."); window.location.href = "team.php";</script>';
@@ -87,8 +87,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action']) && $_POST['
     <input type="hidden" name="action" value="update">
 
     <?php if (isset($player)): ?>
-        <label for="player_name">Player Name:</label>
-        <input type="text" name="player_name" value="<?php echo htmlspecialchars($player['player_name']); ?>" required><br><br>
+        <label for="name">Player Name:</label>
+        <input type="text" name="player_name" value="<?php echo htmlspecialchars($player['name']); ?>" required><br><br>
 
         <label for="position">Position:</label>
         <input type="text" name="position" value="<?php echo htmlspecialchars($player['position']); ?>" required><br><br>

@@ -1,69 +1,44 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 session_start();
+require '../src/PHPMailer.php';
+require '../src/SMTP.php';
+require '../src/Exception.php';
 
-if (isset($_SESSION['userId'])) {
-    echo "Redirecting to dashboard...";
-    header("Location: org_dashboard.php");
-    exit();
-}
+require 'db_connection.php'; // Include your database connection
 
-$host = "localhost";
-$user = "root"; 
-$password = ""; 
-$dbname = "leaguedb";
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
-$conn = new mysqli($host, $user, $password, $dbname);
+// Initialize message variable
+$message = '';
+if (isset($_POST['login'])) {
+    $email = trim($_POST['email']);
+    $password = trim($_POST['password']);
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-$message = "";
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-
-    $stmt = $conn->prepare("SELECT userId, name, password FROM user WHERE email = ?");
+    // Fetch user details
+    $stmt = $conn->prepare("SELECT * FROM user WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
-    $stmt->store_result();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
 
-    if ($stmt->num_rows > 0) {
-        $stmt->bind_result($userId, $name, $hashed_password);
-        $stmt->fetch();
-
-        // Debugging output
-        echo "Fetched User ID: $userId, Name: $name<br>";
-
-        if (password_verify($password, $hashed_password)) {
-            $_SESSION['userId'] = $userId; // Store user ID in session
-            $_SESSION['username'] = $name; // Store user name in session
-
-            // Debugging output
-            print_r($_SESSION); // Show session before redirection
-
-            // Check if "Remember Me" was selected
-            if (isset($_POST['remember_me'])) {
-                setcookie("userId", $userId, time() + (30 * 24 * 60 * 60), "/"); // 30 days
-            }
-
-            header("Location: org_dashboard.php");
+    if ($user && password_verify($password, $user['password'])) {
+        if ($user['status'] === 'approved') {
+            session_regenerate_id(true);
+            $_SESSION['user_id'] = $user['userId'];
+            $_SESSION['name'] = htmlspecialchars($user['name']);
+            $_SESSION['email'] = htmlspecialchars($user['email']);
+            header('Location: org_dashboard.php');
             exit();
         } else {
-            $message = "Incorrect password. Please try again.";
+            $message = 'Your account is not approved yet. Please wait for approval.';
         }
     } else {
-        $message = "No account found with that email.";
+        $message = 'Invalid email or password.';
     }
-    $stmt->close();
 }
 
-$conn->close();
+
 ?>
 
 <!DOCTYPE html>
@@ -75,11 +50,9 @@ $conn->close();
     <link rel="stylesheet" href="../assests/css/loginstyle.css">
 </head>
 <body> 
-<div class="button-container-3">
-            
-            <button  onclick="window.location.href='index.php'">LeaguePro</button>
-           
-        </div>
+    <div class="button-container-3">
+        <button onclick="window.location.href='index.php'">LeaguePro</button>
+    </div>
         
     <div class="container">
         <h1>Organizer Login</h1>
@@ -88,16 +61,18 @@ $conn->close();
                 <?php echo $message; ?>
             </div>
         <?php endif; ?>
-        <form method="POST" >
+        <form method="POST">
             <label for="email">Email</label>
             <input type="email" name="email" required>
 
             <label for="password">Password</label>
             <input type="password" name="password" required>
 
-           
+            <label for="remember_me">
+                <input type="checkbox" name="remember_me"> Remember me
+            </label>
 
-            <button type="submit">Login</button>
+            <button type="submit" name="login">Login</button>
             <p class="register-prompt">Don't have an account? <a href="registration.php">Register here</a></p>
         </form>
     </div>
