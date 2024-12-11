@@ -3,122 +3,128 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Arial', sans-serif;
 }
 
-/* Prevent scrolling */
-html, body {
-    height: 100%;
-    overflow: hidden; /* Disables scrolling */
-}
-
-/* Body and Background */
+/* Body and Container */
 body {
-    height: 100%;
-    background: #f4f6f8; /* Light gray background for contrast */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
     text-align: center;
+    margin: 0;
+}
+
+/* Container */
+.container {
+    padding: 20px;
     position: relative;
+    z-index: 10;
+    width: 90%;
+    margin: 20px auto;
 }
 
 /* Header Styling */
 header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 30px 0;
+    text-align: center;
+    position: relative;
+}
+
+/* Home Button and Admin Button Container */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
     position: absolute;
     top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-    color: #2c3e50; /* Dark text color */
-    z-index: 1;
+    left: 0;
+    right: 0;
+    z-index: 10;
 }
 
-header .home-button {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #041562; /* Blue color */
+.home-button {
+    font-size: 1.8em;
+    color: #ecf0f1;
     text-decoration: none;
+    font-weight: bold;
+}
+
+.admin-button-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.admin-button {
+    background-color: #e74c3c;
+    color: white;
     padding: 10px 20px;
-    border-radius: 10px;
-    background: #B0C4DE; /* Light blue background */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-    transition: background 0.3s, transform 0.3s;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+    border-radius: 25px;
+    transition: background-color 0.3s;
 }
 
-header .home-button:hover {
-    background: rgba(52, 152, 219, 1);
-    transform: scale(1.05);
+/* Hover effect for admin button */
+.admin-button:hover {
+    background-color: #c0392b;
 }
 
-/* Quote Styling */
-h2.quote {
-    font-size: 1.8rem;
-    font-weight: 500;
-    color: #34495e; /* Darker text color for contrast */
-    margin-top: 10px;
-    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Container for Buttons */
-.container {
-    text-align: center;
+/* Quote */
+.quote {
+    font-size: 2.5em;
+    font-style: italic;
+    margin-top: 150px;
     z-index: 1;
     position: relative;
-    margin-top: 100px; /* Adjusted for better placement */
 }
 
-/* Background Image Styling */
+/* Background Image */
 .bg-image {
-    width: 80%; /* Make the image smaller */
-    max-width: 600px;
-    margin-top: 50px;
-    border-radius: 15px; /* Smooth edges */
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Soft shadow for a subtle effect */
+    width: 60%; /* Reduce the size of the image to 60% */
+    height: 50vh; /* Take up half the height of the screen */
+    object-fit: cover;
+    position: absolute;
+    bottom: 0;
+    left: 0; /* Start from the left side */
+    transform: scale(0.6) translateX(55%) translateY(55%); /* Scale down and move left */
+    z-index: -1; /* Place the image behind the content */
 }
 
-/* Button Containers */
-.button-container-1, .button-container-2 {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    margin-top: 30px;
+/* Transparent White Overlay */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2); /* Lighter frosted effect */
+    z-index: 5;
+    border-radius: 20px;
 }
 
-/* General Button Styling */
-.button-container-1 .fans-button, .button-container-2 .organizer-button {
-    padding: 15px 30px;
-    font-size: 1.2rem;
-    font-weight: 600;
-    background: linear-gradient(145deg, #3498db, #2980b9); /* Gradient effect */
+/* Button Container Styling */
+.button-container {
+    display: inline-block;
+    margin-top: 40px;
+}
+
+.fans-button, .organizer-button {
+    background-color: #3498db;
     color: white;
+    padding: 15px 40px;
     border: none;
-    border-radius: 50px;
     cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, filter 0.3s ease;
-    width: 180px;
-    text-transform: uppercase;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-    outline: none;
+    font-size: 1.5em;
+    border-radius: 30px;
+    margin: 10px;
 }
 
-/* Hover Effects for Buttons */
-.button-container-1 .fans-button:hover, .button-container-2 .organizer-button:hover {
-    background: linear-gradient(145deg, #2980b9, #3498db);
-    transform: translateY(-6px); /* Lift effect on hover */
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Stronger shadow */
-    filter: brightness(1.1); /* Slightly brighten on hover */
-}
-
-/* Active Button State */
-.button-container-1 .fans-button:active, .button-container-2 .organizer-button:active {
-    transform: translateY(2px); /* Subtle push when clicked */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* Reduce shadow on click */
-}
-
-/* Focus State for Accessibility */
-.button-container-1 .fans-button:focus, .button-container-2 .organizer-button:focus {
-    outline: none;
-    box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.5); /* Outline on focus for accessibility */
+/* Remove hover and active color changes */
+.fans-button:active, .organizer-button:active,
+.fans-button:hover, .organizer-button:hover {
+    transform: none;
 }

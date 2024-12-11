@@ -1,0 +1,73 @@
+/* General Body Styling */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100vh;
+    background-color: #f4f4f4;
+}
+
+/* Container Styling */
+.container {
+    width: 90%;         /* Set width to 90% */
+    max-width: 1200px;  /* Optional: to avoid it becoming too large on wide screens */
+    margin-top: 20px;   /* Space from top */
+    margin-bottom: 20px; /* Space from bottom */
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling for the tables */
+.table-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px; /* Gap between tables */
+    margin-top: 20px;
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th, table td {
+    padding: 8px 12px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+table th {
+    background-color: #f2f2f2;
+}
+
+/* Styling for the logout icon button */
+.logout-btn {
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px;
+    border-radius: 50%;  /* Make it circular */
+    font-size: 20px;
+    width: 40px;   /* Set width and height */
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    margin-top: 20px;
+}
+
+.logout-btn:hover {
+    background-color: #c0392b;
+}
+
+/* Styling the logout icon */
+.logout-btn i {
+    font-size: 20px;
+    margin: 0;
+}

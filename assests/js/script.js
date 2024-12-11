@@ -15,3 +15,18 @@ function confirmDelete() {
     return confirm("Are you sure you want to delete this item?");
 }
 
+function showModal() {
+    document.getElementById('leagueModal').style.display = 'block';
+}
+
+function closeModal() {
+    document.getElementById('leagueModal').style.display = 'none';
+}
+
+// Close modal if clicked outside of it
+window.onclick = function (event) {
+    const modal = document.getElementById('leagueModal');
+    if (event.target === modal) {
+        closeModal();
+    }
+};

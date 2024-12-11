@@ -119,128 +119,140 @@ if (isset($_GET['edit']) && isset($_GET['id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="../assests/css/admin.css"> <!-- Link to external CSS -->
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <h2>Admin Portal</h2>
+    <div class="container">
+        <h2>Admin Portal</h2>
 
-    <?php if (!isset($_SESSION['admin_id'])): ?>
-        <!-- Registration Form -->
-        <h3>Register</h3>
-        <form method="POST" action="">
-            <label>Name:</label>
-            <input type="text" name="name" required>
-            <br>
-            <label>Email:</label>
-            <input type="email" name="email" required>
-            <br>
-            <label>Password:</label>
-            <input type="password" name="password" required>
-            <br>
-            <label>Confirm Password:</label>
-            <input type="password" name="confirm_password" required>
-            <br>
-            <button type="submit" name="register">Register</button>
-        </form>
+        <?php if (!isset($_SESSION['admin_id'])): ?>
+            <!-- Registration Form -->
+            <h3>Register</h3>
+            <form method="POST" action="">
+                <label>Name:</label>
+                <input type="text" name="name" required>
+                <br>
+                <label>Email:</label>
+                <input type="email" name="email" required>
+                <br>
+                <label>Password:</label>
+                <input type="password" name="password" required>
+                <br>
+                <label>Confirm Password:</label>
+                <input type="password" name="confirm_password" required>
+                <br>
+                <button type="submit" name="register">Register</button>
+            </form>
 
-        <hr>
+            <hr>
 
-        <!-- Login Form -->
-        <h3>Login</h3>
-        <form method="POST" action="">
-            <label>Email:</label>
-            <input type="email" name="email" required>
-            <br>
-            <label>Password:</label>
-            <input type="password" name="password" required>
-            <br>
-            <button type="submit" name="login">Login</button>
-        </form>
-
-    <?php else: ?>
-        <!-- Admin Dashboard -->
-        <h3>Welcome, <?php echo $_SESSION['admin_name']; ?>!</h3>
-        <p>You are logged in as an Admin.</p>
-
-        <h4>Manage Users (Organizers)</h4>
-
-        <!-- Pending Users Table -->
-        <h5>Pending Users</h5>
-        <?php
-        $query = "SELECT * FROM user WHERE status = 'pending'";
-        $result = mysqli_query($conn, $query);
-
-        if ($result && mysqli_num_rows($result) > 0): ?>
-            <table border="1">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($user = $result->fetch_assoc()): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($user['name']); ?></td>
-                        <td><?php echo htmlspecialchars($user['email']); ?></td>
-                        <td>
-                            <a href="?action=approve&id=<?php echo $user['userId']; ?>">Approve</a> |
-                            <a href="?action=deny&id=<?php echo $user['userId']; ?>" 
-                               onclick="return confirm('Are you sure you want to deny this user? This action cannot be undone.');">
-                               Deny
-                            </a> |
-                            <a href="?edit=<?php echo $user['userId']; ?>">Edit</a>
-                        </td>
-                    </tr>
-                <?php endwhile; ?>
-            </tbody>
-            </table>
+            <!-- Login Form -->
+            <h3>Login</h3>
+            <form method="POST" action="">
+                <label>Email:</label>
+                <input type="email" name="email" required>
+                <br>
+                <label>Password:</label>
+                <input type="password" name="password" required>
+                <br>
+                <button type="submit" name="login">Login</button>
+            </form>
         <?php else: ?>
-            <p>No users pending approval.</p>
+            <!-- Admin Dashboard -->
+            <h3>Welcome, <?php echo $_SESSION['admin_name']; ?>!</h3>
+            <p>You are logged in as an Admin.</p>
+
+            <h4>Manage Users (Organizers)</h4>
+
+            <!-- Flex container for Pending and Approved Users Tables -->
+            <div class="table-container">
+                <!-- Pending Users Table -->
+                <div>
+                    <h5>Pending Users</h5>
+                    <?php
+                    $query = "SELECT * FROM user WHERE status = 'pending'";
+                    $result = mysqli_query($conn, $query);
+
+                    if ($result && mysqli_num_rows($result) > 0): ?>
+                        <table border="1">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while ($user = $result->fetch_assoc()): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($user['name']); ?></td>
+                                    <td><?php echo htmlspecialchars($user['email']); ?></td>
+                                    <td>
+                                        <a href="?action=approve&id=<?php echo $user['userId']; ?>">Approve</a> |
+                                        <a href="?action=deny&id=<?php echo $user['userId']; ?>" 
+                                           onclick="return confirm('Are you sure you want to deny this user? This action cannot be undone.');">
+                                           Deny
+                                        </a> |
+                                        <a href="?edit=<?php echo $user['userId']; ?>">Edit</a>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                        </table>
+                    <?php else: ?>
+                        <p>No users pending approval.</p>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Approved Users Table -->
+                <div>
+                    <h5>Approved Users</h5>
+                    <?php
+                    $query = "SELECT * FROM user WHERE status = 'approved'";
+                    $result = mysqli_query($conn, $query);
+
+                    if ($result && mysqli_num_rows($result) > 0): ?>
+                        <table border="1">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while ($user = $result->fetch_assoc()): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($user['name']); ?></td>
+                                    <td><?php echo htmlspecialchars($user['email']); ?></td>
+                                    <td>
+                                        <a href="?action=deny&id=<?php echo $user['userId']; ?>" 
+                                           onclick="return confirm('Are you sure you want to deny this user? This action cannot be undone.');">
+                                           Deny
+                                        </a> |
+                                        <a href="?edit=<?php echo $user['userId']; ?>">Edit</a> |
+                                        <a href="?action=delete&id=<?php echo $user['userId']; ?>" 
+                                           onclick="return confirm('Are you sure you want to delete this user?');">
+                                           Delete
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                        </table>
+                    <?php else: ?>
+                        <p>No approved users.</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Logout Button as an Icon -->
+            <a href="?logout=true" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> <!-- Font Awesome Logout Icon -->
+            </a>
         <?php endif; ?>
-
-        <hr>
-
-        <!-- Approved Users Table -->
-        <h5>Approved Users</h5>
-        <?php
-        $query = "SELECT * FROM user WHERE status = 'approved'";
-        $result = mysqli_query($conn, $query);
-
-        if ($result && mysqli_num_rows($result) > 0): ?>
-            <table border="1">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($user = $result->fetch_assoc()): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($user['name']); ?></td>
-                        <td><?php echo htmlspecialchars($user['email']); ?></td>
-                        <td>
-                            <a href="?action=deny&id=<?php echo $user['userId']; ?>" 
-                               onclick="return confirm('Are you sure you want to deny this user? This action cannot be undone.');">
-                               Deny
-                            </a> |
-                            <a href="?edit=<?php echo $user['userId']; ?>">Edit</a> |
-                            <a href="?action=delete&id=<?php echo $user['userId']; ?>" 
-                               onclick="return confirm('Are you sure you want to delete this user?');">
-                               Delete
-                            </a>
-                        </td>
-                    </tr>
-                <?php endwhile; ?>
-            </tbody>
-            </table>
-        <?php else: ?>
-            <p>No approved users.</p>
-        <?php endif; ?>
-
-        <a href="?logout=true">Logout</a>
-    <?php endif; ?>
+    </div>
 </body>
 </html>
