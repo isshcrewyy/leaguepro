@@ -30,3 +30,13 @@ window.onclick = function (event) {
         closeModal();
     }
 };
+
+document.querySelector('form').addEventListener('submit', function (e) {
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
+
+    if (new Date(endDate) < new Date(startDate)) {
+        alert("End Date cannot be earlier than Start Date.");
+        e.preventDefault();
+    }
+});

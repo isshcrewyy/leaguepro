@@ -88,7 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <a href="org_dashboard.php" class="logo">Organizer</a>
     <span class="menu-toggle" onclick="toggleMenu()">☰</span> <!-- Hamburger Icon -->
     <ul id="nav-links" class="hidden">
-        <li><a href="add_league.php">Add League</a></li>
+        <li><a href="edit_league.php">Edit League</a></li>
         <li><a href="team.php">Your Team</a></li>
         <li><a href="add_game.php">Add Game</a></li>
         <li><a href="#leaderboard">Update Leaderboard</a></li>

@@ -1,59 +1,142 @@
+/* General Styles */
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
+  font-family: 'Arial', sans-serif;
+  background-color: #f9f9f9;
   margin: 0;
   padding: 0;
 }
 
+/* Container for Form */
 .container {
-  width: 80%;
-  margin: 50px auto;
-  background-color: white;
+  max-width: 500px; /* Reduce width for cleaner look */
+  margin: 20px auto; /* Center the form */
   padding: 20px;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Form Heading */
+h2 {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+/* Form Elements */
 form {
-  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Add spacing between fields */
 }
 
 label {
-  display: block;
-  margin: 10px 0 5px;
+  font-weight: bold;
+  font-size: 0.9rem;
 }
 
-input[type="text"],
-input[type="number"],
+input,
 select {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 5px;
+  padding: 8px;
+  font-size: 1rem;
   border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%; /* Full width input fields */
+  box-sizing: border-box;
 }
 
-input[type="submit"] {
-  background-color: #4CAF50;
-  color: white;
-  padding: 10px 20px;
+/* Buttons Layout */
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+button {
+  flex: 1; /* Equal width for both buttons */
+  padding: 10px;
   border: none;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+  margin: 0 5px;
+}
+
+/* Specific Button Colors */
+button.update {
+  background-color: #28a745; /* Green for Update */
+}
+
+button.update:hover {
+  background-color: #218838;
+}
+
+button.delete {
+  background-color: #dc3545; /* Red for Delete */
+}
+
+button.delete:hover {
+  background-color: #c82333;
+}
+/* Navbar Styling */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #2c3e50;
+  color: #fff;
+  padding: 15px 30px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: #fff;
+  font-weight: bold;
+  margin: 0 10px;
+}
+
+.navbar a.logo {
+  font-size: 1.5rem;
+}
+
+.navbar ul {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar li {
+  margin: 0 10px;
+}
+
+.navbar .logout-btn {
+  background-color: #e74c3c;
+  color: #fff;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.navbar .logout-btn:hover {
+  background-color: #c0392b;
+}
+
+/* Responsive Menu */
+.navbar .menu-toggle {
+  display: none;
+  font-size: 1.5rem;
   cursor: pointer;
 }
 
-input[type="submit"]:hover {
-  background-color: #45a049;
-}
-
-nav a {
-  text-decoration: none;
-  padding: 10px;
-  background-color: #333;
-  color: white;
-  border-radius: 5px;
-  margin-right: 10px;
-}
-
-nav a:hover {
-  background-color: #555;
+.navbar ul.active {
+  display: block;
 }

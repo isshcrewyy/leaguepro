@@ -17,7 +17,7 @@
 
     <span class="menu-toggle" onclick="toggleMenu()">☰</span>
     <ul id="nav-links">
-    <li><a href="add_league.php">Add League</a></li>
+    <li><a href="edit_league.php">Edit League</a></li>
       <li><a href="team.php">Your team</a></li>
       <li><a href="add_game.php">Add Game</a></li>
       <li><a href="#leaderboard">Update Leaderboard</a></li>

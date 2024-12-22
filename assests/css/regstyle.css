@@ -1,50 +1,84 @@
+/* regstyle.css */
 body {
-    background-color: #f3f4f6;
     font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
 }
+
 .container {
-    max-width: 400px;
-    margin: auto;
+    width: 100%;
+    max-width: 500px;
+    margin: 50px auto;
+    background-color: #fff;
     padding: 20px;
-    background-color: white;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
+
 h1 {
     text-align: center;
     color: #333;
 }
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
 label {
-    display: block;
-    margin: 10px 0 5px;
+    margin-bottom: 8px;
+    font-size: 14px;
     color: #333;
 }
+
 input[type="text"],
 input[type="email"],
-input[type="password"] {
-    width: 100%;
+input[type="password"],
+input[type="number"],
+select {
     padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 3px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
 }
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+select:focus {
+    border-color: #4CAF50;
+    outline: none;
+}
+
 button {
-    width: 100%;
     padding: 10px;
-    background-color: #007bff;
-    color: white;
+    background-color: #4CAF50;
+    color: #fff;
     border: none;
-    border-radius: 3px;
+    border-radius: 4px;
+    font-size: 16px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
+
 button:hover {
-    background-color: #0056b3;
+    background-color: #45a049;
 }
-.message {
-    background-color: #28a745;
-    color: white;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 3px;
+
+.alert {
+    color: red;
+    font-size: 14px;
     text-align: center;
+    margin-top: 20px;
+}
+
+select {
+    font-size: 14px;
+}
+
+input[type="number"] {
+    max-width: 100px;
 }

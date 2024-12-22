@@ -10,6 +10,8 @@ if (!isset($_SESSION['userId'])) {
         exit();
     }
 }
+echo $_SESSION['userId'];
+echo $_SESSION['name'];
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['add_league'])) {
     $league_name = trim($_POST['league_name']);
@@ -30,6 +32,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['add_league'])) {
             echo '<script>alert("Failed to add league: ' . $stmt->error . '");</script>';
         }
     }
+}
+
+$userId = $_SESSION['userId'];  // Assuming the user ID is stored in session as 'userId'
+
+// Fetch the user's league details from the 'form' table
+$query = "SELECT * FROM form WHERE userId = '$userId' LIMIT 1"; 
+$result = mysqli_query($conn, $query);
+
+if ($result && mysqli_num_rows($result) > 0) {
+    $league_info = mysqli_fetch_assoc($result); // Storing fetched data in $league_info
+} else {
+    // Handle the case where no form data is found (maybe user hasn't submitted the form)
+    echo "No league details found.";
+    exit();
 }
 ?>
 <!DOCTYPE html>
@@ -71,7 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['add_league'])) {
         <!-- Centered Create League Button -->
         <div class="create-league-section">
             <p>Ready to manage a league? Start now!</p>
-            <button class="create-league-btn" onclick="window.location.href='add_league.php'">Create Your League</button>
+           
             <!-- Trigger Button -->
                 <button onclick="showModal()" class="btn">Create Your Own League</button>
 
@@ -95,7 +111,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['add_league'])) {
                 </div>
 
         </div>
-
+     <!-- Display league details fetched from the 'form' table -->
+    <h2>League Details</h2>
+    <p><strong>League Name:</strong> <?php echo $league_info['league_name']; ?></p>
+    <p><strong>Duration:</strong> From <?php echo $league_info['start_date']; ?> to <?php echo $league_info['end_date']; ?></p>
+    <p><strong>Max Teams:</strong> <?php echo $league_info['max_teams']; ?></p>
+    <p><strong>Location:</strong> <?php echo $league_info['location']; ?></p>
+    <!-- Add any other details you want to display -->
         <div class="section-grid">
             <section class="recent-activities">
                 <h2>Recent Activities</h2>

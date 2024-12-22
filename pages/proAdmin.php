@@ -64,8 +64,7 @@ if (isset($_GET['logout'])) {
     header("Location: proAdmin.php");
     exit;
 }
-
-// Handle Approve/Deny Actions
+// Handle user Approve/Deny Actions
 if (isset($_GET['action']) && isset($_GET['id'])) {
     $userId = (int) $_GET['id']; // Ensure ID is an integer
     $action = $_GET['action'];
@@ -87,32 +86,37 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
     exit;
 }
 
-// Handle Edit Action
-if (isset($_GET['edit']) && isset($_GET['id'])) {
-    $userId = (int) $_GET['id'];
-    // Fetch user data to populate the edit form
-    $stmt = $conn->prepare("SELECT * FROM user WHERE userId = ?");
-    $stmt->bind_param("i", $userId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $user = $result->fetch_assoc();
+// Handle Form Actions (approve, deny, delete)
+if (isset($_GET['form_action']) && isset($_GET['id'])) {
+    $formId = (int)$_GET['id']; // Ensure the ID is an integer
+    $formAction = $_GET['form_action'];
 
-    if (isset($_POST['update'])) {
-        $name = $_POST['name'];
-        $email = $_POST['email'];
+    switch ($formAction) {
+        case 'approve':
+            // Approve the form
+            $query = "UPDATE form SET status = 'approved' WHERE id = ?";
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param("i", $formId);
+            $stmt->execute();
+            break;
 
-        // Update user info
-        $updateQuery = "UPDATE user SET name = ?, email = ? WHERE userId = ?";
-        $stmt = $conn->prepare($updateQuery);
-        $stmt->bind_param("ssi", $name, $email, $userId);
-        $stmt->execute();
-        
-        // Redirect after updating
-        header("Location: proAdmin.php");
-        exit;
+        case 'edit':
+            // Redirect to edit form page
+            header("Location: edit_form.php?id=$formId");
+            exit;
+
+        case 'delete':
+            // Delete the form
+            $query = "DELETE FROM form WHERE id = ?";
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param("i", $formId);
+            $stmt->execute();
+            break;
     }
 }
+
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -163,6 +167,7 @@ if (isset($_GET['edit']) && isset($_GET['id'])) {
             <!-- Admin Dashboard -->
             <h3>Welcome, <?php echo $_SESSION['admin_name']; ?>!</h3>
             <p>You are logged in as an Admin.</p>
+ 
 
             <h4>Manage Users (Organizers)</h4>
 
@@ -179,6 +184,7 @@ if (isset($_GET['edit']) && isset($_GET['id'])) {
                         <table border="1">
                         <thead>
                             <tr>
+                                <th>User ID</th>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Action</th>
@@ -187,6 +193,7 @@ if (isset($_GET['edit']) && isset($_GET['id'])) {
                         <tbody>
                             <?php while ($user = $result->fetch_assoc()): ?>
                                 <tr>
+                                <td><?php echo htmlspecialchars($user['userId']); ?></td>
                                     <td><?php echo htmlspecialchars($user['name']); ?></td>
                                     <td><?php echo htmlspecialchars($user['email']); ?></td>
                                     <td>
@@ -217,6 +224,7 @@ if (isset($_GET['edit']) && isset($_GET['id'])) {
                         <table border="1">
                         <thead>
                             <tr>
+                                <th>User ID</th>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Action</th>
@@ -225,6 +233,7 @@ if (isset($_GET['edit']) && isset($_GET['id'])) {
                         <tbody>
                             <?php while ($user = $result->fetch_assoc()): ?>
                                 <tr>
+                                   <td><?php echo htmlspecialchars($user['userId']); ?></td>
                                     <td><?php echo htmlspecialchars($user['name']); ?></td>
                                     <td><?php echo htmlspecialchars($user['email']); ?></td>
                                     <td>
@@ -247,11 +256,117 @@ if (isset($_GET['edit']) && isset($_GET['id'])) {
                     <?php endif; ?>
                 </div>
             </div>
+            <h4>Manage Forms</h4>
 
-            <!-- Logout Button as an Icon -->
-            <a href="?logout=true" class="logout-btn">
-                <i class="fas fa-sign-out-alt"></i> <!-- Font Awesome Logout Icon -->
-            </a>
+            <!-- Pending Forms Table -->
+            <div>
+                <h5>Pending Forms</h5>
+                <?php
+                $query = "SELECT * FROM form WHERE status = 'pending'";
+                $result = mysqli_query($conn, $query);
+
+                if ($result && mysqli_num_rows($result) > 0): ?>
+                    <table border="1">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>League Name</th>
+                            <th>Duration</th>
+                            <th>Num Teams</th>
+                            <th>Max Teams</th>
+                            <th>One League</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Experience</th>
+                            <th>Location</th>
+                            <th>Rules</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php while ($form = $result->fetch_assoc()): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($form['userId']); ?></td>
+                                <td><?php echo htmlspecialchars($form['league_name']); ?></td>
+                                <td><?php echo htmlspecialchars($form['duration']); ?></td>
+                                <td><?php echo htmlspecialchars($form['num_teams']); ?></td>
+                                <td><?php echo htmlspecialchars($form['max_teams']); ?></td>
+                                <td><?php echo htmlspecialchars($form['one_league']); ?></td>
+                                <td><?php echo htmlspecialchars($form['start_date']); ?></td>
+                                <td><?php echo htmlspecialchars($form['end_date']); ?></td>
+                                <td><?php echo htmlspecialchars($form['experience']); ?></td>
+                                <td><?php echo htmlspecialchars($form['location']); ?></td>
+                                <td><?php echo htmlspecialchars($form['rules']); ?></td>
+                                <td><?php echo htmlspecialchars($form['status']); ?></td>
+                                <td>
+                                    <a href="?form_action=approve&id=<?php echo $form['id']; ?>">Approve</a> |
+                                    
+                                    <a href="?form_action=delete&id=<?php echo $form['id']; ?>" 
+                                       onclick="return confirm('Are you sure you want to delete this form?');">Delete</a>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                    </table>
+                <?php else: ?>
+                    <p>No forms pending approval.</p>
+                <?php endif; ?>
+            </div>
+
+            <!-- Approved Forms Table -->
+            <div>
+                <h5>Approved Forms</h5>
+                <?php
+                $query = "SELECT * FROM form WHERE status = 'approved'";
+                $result = mysqli_query($conn, $query);
+
+                if ($result && mysqli_num_rows($result) > 0): ?>
+                    <table border="1">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>League Name</th>
+                            <th>Duration</th>
+                            <th>Num Teams</th>
+                            <th>Max Teams</th>
+                            <th>One League</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Experience</th>
+                            <th>Location</th>
+                            <th>Rules</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php while ($form = $result->fetch_assoc()): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($form['userId']); ?></td>
+                                <td><?php echo htmlspecialchars($form['league_name']); ?></td>
+                                <td><?php echo htmlspecialchars($form['duration']); ?></td>
+                                <td><?php echo htmlspecialchars($form['num_teams']); ?></td>
+                                <td><?php echo htmlspecialchars($form['max_teams']); ?></td>
+                                <td><?php echo htmlspecialchars($form['one_league']); ?></td>
+                                <td><?php echo htmlspecialchars($form['start_date']); ?></td>
+                                <td><?php echo htmlspecialchars($form['end_date']); ?></td>
+                                <td><?php echo htmlspecialchars($form['experience']); ?></td>
+                                <td><?php echo htmlspecialchars($form['location']); ?></td>
+                                <td><?php echo htmlspecialchars($form['rules']); ?></td>
+                                <td><?php echo htmlspecialchars($form['status']); ?></td>
+                                <td>
+                                    <a href="?form_action=delete&id=<?php echo $form['id']; ?>" 
+                                       onclick="return confirm('Are you sure you want to delete this form?');">Delete</a>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                    </table>
+                <?php else: ?>
+                    <p>No approved forms.</p>
+                <?php endif; ?>
+            </div>
         <?php endif; ?>
     </div>
 </body>
