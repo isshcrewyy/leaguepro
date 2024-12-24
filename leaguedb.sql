@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 12, 2024 at 03:55 PM
+-- Generation Time: Dec 24, 2024 at 11:13 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -24,6 +24,28 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `admin`
+--
+
+CREATE TABLE `admin` (
+  `admin_id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `admin`
+--
+
+INSERT INTO `admin` (`admin_id`, `name`, `email`, `password`, `created_at`) VALUES
+(3, 'Diwas Shrestha', 'sthadiwas106@gmail.com', '$2y$10$mGk4crnuz9jSAPL00w8xr.mrFde86LUQYVG0bFxZXpElB9TZpZiiO', '2024-12-08 13:34:27'),
+(4, 'admin', 'admin@gmail.com', '$2y$10$TGVihFud1o3Xuvtj6eHltuBVR5DfiPC0E/ksffL7p4X/5NPxyjudy', '2024-12-09 16:19:36');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `club`
 --
 
@@ -34,16 +56,6 @@ CREATE TABLE `club` (
   `location` varchar(100) DEFAULT NULL,
   `founded_year` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `club`
---
-
-INSERT INTO `club` (`club_id`, `name`, `league_id`, `location`, `founded_year`) VALUES
-(16, 'JMC', 15, 'kuleshwar', 2025),
-(19, 'KMC', 15, 'bagbazar', 2025),
-(20, 'JMC', 15, 'germany', 1900),
-(21, 'JMC', 15, 'germany', 1900);
 
 -- --------------------------------------------------------
 
@@ -56,16 +68,43 @@ CREATE TABLE `coach` (
   `name` varchar(100) NOT NULL,
   `experience` int(11) DEFAULT NULL,
   `age` int(11) DEFAULT NULL,
-  `club_id` int(11) DEFAULT NULL
+  `club_id` int(11) DEFAULT NULL,
+  `phone_number` varchar(15) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `form`
+--
+
+CREATE TABLE `form` (
+  `form_id` int(11) NOT NULL,
+  `userId` int(11) NOT NULL,
+  `duration` int(11) NOT NULL,
+  `num_teams` int(11) NOT NULL,
+  `max_teams` int(11) NOT NULL,
+  `one_league` enum('yes','no') NOT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date NOT NULL,
+  `experience` text DEFAULT NULL,
+  `active` enum('yes','no') NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `rules` text DEFAULT NULL,
+  `status` enum('pending','approved','denied') DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `league_name` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `coach`
+-- Dumping data for table `form`
 --
 
-INSERT INTO `coach` (`coach_id`, `name`, `experience`, `age`, `club_id`) VALUES
-(6, 'Diwas Shrestha', 11, 20, 16),
-(9, 'pep', 11, 20, 16);
+INSERT INTO `form` (`form_id`, `userId`, `duration`, `num_teams`, `max_teams`, `one_league`, `start_date`, `end_date`, `experience`, `active`, `location`, `rules`, `status`, `created_at`, `league_name`) VALUES
+(9, 54, 1, 0, 9, '', '2024-12-01', '2025-01-01', 'y', 'yes', 'Kathmandu', 'y', 'approved', '2024-12-23 07:07:48', 'Nepal Super League'),
+(10, 55, 1, 0, 1, '', '2024-12-02', '2025-01-02', 'Y', 'yes', 'Italy', 'Y', 'approved', '2024-12-23 10:57:57', 'Serie A'),
+(11, 56, 1, 0, 1, '', '2024-01-02', '2024-02-02', 'y', 'yes', 'ktmy', 'y', 'approved', '2024-12-23 11:31:50', 'heros'),
+(12, 57, 1, 0, 1, '', '2022-01-02', '2022-02-02', 'y', 'yes', 'kuleshwar', 'y', 'approved', '2024-12-23 11:43:09', 'Laliga');
 
 -- --------------------------------------------------------
 
@@ -80,17 +119,9 @@ CREATE TABLE `game` (
   `away_club_id` int(11) DEFAULT NULL,
   `date` date DEFAULT NULL,
   `time` time DEFAULT NULL,
-  `score_home` int(100) DEFAULT NULL,
-  `score_away` int(100) DEFAULT NULL
+  `score_home` int(11) DEFAULT NULL,
+  `score_away` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `game`
---
-
-INSERT INTO `game` (`match_id`, `league_id`, `home_club_id`, `away_club_id`, `date`, `time`, `score_home`, `score_away`) VALUES
-(2, 15, 16, 19, '2024-11-10', '14:40:00', 2, 1),
-(3, 15, 16, 19, '2024-11-10', '14:40:00', 2, 1);
 
 -- --------------------------------------------------------
 
@@ -119,20 +150,22 @@ CREATE TABLE `leaderboard` (
 CREATE TABLE `league` (
   `league_id` int(11) NOT NULL,
   `league_name` varchar(100) DEFAULT NULL,
-  `user_id` int(11) DEFAULT NULL,
+  `userId` int(11) NOT NULL,
   `start_date` int(11) DEFAULT NULL,
   `end_date` int(11) DEFAULT NULL,
   `season` int(100) DEFAULT NULL,
-  `userId` int(11) DEFAULT NULL
+  `status` varchar(20) DEFAULT 'pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `league`
 --
 
-INSERT INTO `league` (`league_id`, `league_name`, `user_id`, `start_date`, `end_date`, `season`, `userId`) VALUES
-(15, 'BCA CUP', 12, 2025, 2025, 1, NULL),
-(17, 'NPL', 13, 2024, 2024, 1, NULL);
+INSERT INTO `league` (`league_id`, `league_name`, `userId`, `start_date`, `end_date`, `season`, `status`) VALUES
+(35, 'Nepal Super League', 54, 2024, 2025, NULL, 'pending'),
+(36, 'Serie A', 55, 2024, 2025, NULL, 'pending'),
+(37, 'heros', 56, 2024, 2024, NULL, 'pending'),
+(38, 'Laliga', 57, 2022, 2022, NULL, 'pending');
 
 -- --------------------------------------------------------
 
@@ -145,15 +178,9 @@ CREATE TABLE `player` (
   `name` varchar(100) NOT NULL,
   `age` int(11) NOT NULL,
   `position` varchar(50) DEFAULT NULL,
-  `club_id` int(11) DEFAULT NULL
+  `club_id` int(11) DEFAULT NULL,
+  `phone_number` varchar(15) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `player`
---
-
-INSERT INTO `player` (`player_id`, `name`, `age`, `position`, `club_id`) VALUES
-(4, 'di', 12, '0', 16);
 
 -- --------------------------------------------------------
 
@@ -166,20 +193,30 @@ CREATE TABLE `user` (
   `name` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `status` enum('pending','approved','denied') DEFAULT 'pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `user`
 --
 
-INSERT INTO `user` (`userId`, `name`, `email`, `password`, `created_at`) VALUES
-(12, 'diwas shrestha', 'diwas254@gmail.com', '$2y$10$Ul3OouwkRcs/FL7myBURkuqsIdF908vaaLApnON93Hg.VMfw6/zW.', '2024-11-10 06:16:16'),
-(13, 'test1', 'test1@gmail.com', '$2y$10$6vwWhs9S2kw70EtpWNS/sOtSyqPy5EFre341UtHIxLhaBceYpgVvO', '2024-11-12 12:53:28');
+INSERT INTO `user` (`userId`, `name`, `email`, `password`, `created_at`, `status`) VALUES
+(54, 'diwas', 'diwas@gmail.com', '$2y$10$qT6xYwQ3ZLRt2Sp6Q6Z.N.wSjwQRwEZAtHF7UpkIJKC8FR9lMpx42', '2024-12-23 07:07:02', 'approved'),
+(55, 'jesus', 'jesus@gmail.com', '$2y$10$EcWWiEXe7M2y88Qn2ibMheKySG04sPSwn8.iQ7XDmhvVwDOQaW/fC', '2024-12-23 10:57:29', 'approved'),
+(56, 'sajan', 'sajan@gmail.com', '$2y$10$AXMMm1AIfsCy6rQEbP.oVOAKrz46s3.sF2HedogB6a9I12zkn6XVS', '2024-12-23 11:31:32', 'approved'),
+(57, 'messi', 'messi@gmail.com', '$2y$10$SAAicX197MNRIgYhPoAvpeCEVL.BldDArtAvxPNMGnEgxiuDUEqpC', '2024-12-23 11:42:48', 'approved');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `admin`
+--
+ALTER TABLE `admin`
+  ADD PRIMARY KEY (`admin_id`),
+  ADD UNIQUE KEY `email` (`email`);
 
 --
 -- Indexes for table `club`
@@ -193,7 +230,14 @@ ALTER TABLE `club`
 --
 ALTER TABLE `coach`
   ADD PRIMARY KEY (`coach_id`),
-  ADD KEY `club_id` (`club_id`);
+  ADD KEY `coach_ibfk_1` (`club_id`);
+
+--
+-- Indexes for table `form`
+--
+ALTER TABLE `form`
+  ADD PRIMARY KEY (`form_id`),
+  ADD KEY `form_ibfk_1` (`userId`);
 
 --
 -- Indexes for table `game`
@@ -217,8 +261,7 @@ ALTER TABLE `leaderboard`
 ALTER TABLE `league`
   ADD PRIMARY KEY (`league_id`),
   ADD UNIQUE KEY `unique_league_name` (`league_name`),
-  ADD KEY `organizerId` (`user_id`),
-  ADD KEY `userId` (`userId`);
+  ADD KEY `fk_user_id` (`userId`);
 
 --
 -- Indexes for table `player`
@@ -239,22 +282,34 @@ ALTER TABLE `user`
 --
 
 --
+-- AUTO_INCREMENT for table `admin`
+--
+ALTER TABLE `admin`
+  MODIFY `admin_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
 -- AUTO_INCREMENT for table `club`
 --
 ALTER TABLE `club`
-  MODIFY `club_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `club_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT for table `coach`
 --
 ALTER TABLE `coach`
-  MODIFY `coach_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `coach_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT for table `form`
+--
+ALTER TABLE `form`
+  MODIFY `form_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `game`
 --
 ALTER TABLE `game`
-  MODIFY `match_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `match_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `leaderboard`
@@ -266,19 +321,19 @@ ALTER TABLE `leaderboard`
 -- AUTO_INCREMENT for table `league`
 --
 ALTER TABLE `league`
-  MODIFY `league_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `league_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT for table `player`
 --
 ALTER TABLE `player`
-  MODIFY `player_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `player_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `userId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `userId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
 -- Constraints for dumped tables
@@ -294,7 +349,13 @@ ALTER TABLE `club`
 -- Constraints for table `coach`
 --
 ALTER TABLE `coach`
-  ADD CONSTRAINT `coach_ibfk_1` FOREIGN KEY (`club_id`) REFERENCES `club` (`club_id`);
+  ADD CONSTRAINT `coach_ibfk_1` FOREIGN KEY (`club_id`) REFERENCES `club` (`club_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `form`
+--
+ALTER TABLE `form`
+  ADD CONSTRAINT `form_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `user` (`userId`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `game`
@@ -314,9 +375,7 @@ ALTER TABLE `leaderboard`
 -- Constraints for table `league`
 --
 ALTER TABLE `league`
-  ADD CONSTRAINT `fk_user` FOREIGN KEY (`userId`) REFERENCES `user` (`userId`),
-  ADD CONSTRAINT `league_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`userId`) ON DELETE CASCADE,
-  ADD CONSTRAINT `league_ibfk_2` FOREIGN KEY (`userId`) REFERENCES `user` (`userId`);
+  ADD CONSTRAINT `fk_user_id` FOREIGN KEY (`userId`) REFERENCES `user` (`userId`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `player`
