@@ -1,6 +1,7 @@
 <?php
 // Start the session
 session_start();
+$name = $_SESSION['name'];
 
 // Ensure that the user is logged in
 if (!isset($_SESSION['userId'])) {

@@ -14,6 +14,7 @@ if (!isset($_SESSION['userId'])) {
 
 $userId = $_SESSION['userId'];  // Get the logged-in user's ID
 
+
 if (isset($_POST['submit_form'])) {
     // Gather form inputs and sanitize them
     $league_name = $_POST['league_name'];

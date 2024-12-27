@@ -28,6 +28,9 @@ if (isset($_POST['register'])) {
             $stmt->bind_param("sss", $name, $email, $hashed_password);
             if ($stmt->execute()) {
                 $_SESSION['userId'] = $conn->insert_id; // Save the userId for use in the next step
+                
+                $_SESSION['name'] = $name;
+                
                 header('Location: entry_form.php');
                 exit();
             } else {
