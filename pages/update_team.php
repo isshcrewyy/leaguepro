@@ -13,11 +13,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         if ($type === 'player') {
             $position = $_POST['position'];
-            $stmt = $conn->prepare("UPDATE player SET name=?, age=?, position=?, club_id=?, phone_number=? WHERE player_id=?");
+            $stmt = $conn->prepare("UPDATE player SET p_name=?, age=?, position=?, club_id=?, phone_number=? WHERE player_id=?");
             $stmt->bind_param("sisisi", $name, $age, $position, $club_id, $phone_number, $id);
         } else {
             $experience = $_POST['experience'];
-            $stmt = $conn->prepare("UPDATE coach SET name=?, age=?, experience=?, club_id=?, phone_number=? WHERE coach_id=?");
+            $stmt = $conn->prepare("UPDATE coach SET co_name=?, age=?, experience=?, club_id=?, phone_number=? WHERE coach_id=?");
             $stmt->bind_param("siisis", $name, $age, $experience, $club_id, $phone_number, $id);
         }
 

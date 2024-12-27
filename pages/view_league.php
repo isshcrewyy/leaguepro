@@ -52,7 +52,7 @@ if ($club_id > 0) {
     if ($clubResult && $clubResult->num_rows > 0) {
         $club = $clubResult->fetch_assoc();
 
-        $playersQuery = "SELECT name, age, position, phone_number FROM player WHERE club_id = $club_id";
+        $playersQuery = "SELECT p_name, age, position, phone_number FROM player WHERE club_id = $club_id";
         $playersResult = $conn->query($playersQuery);
         if ($playersResult && $playersResult->num_rows > 0) {
             while ($player = $playersResult->fetch_assoc()) {
@@ -113,12 +113,7 @@ $conn->close();
     <title>League Fixtures</title>
     <link rel="stylesheet" href="../assests/css/style.css">
     <script>
-@media (max-width: 768px) {
-  function toggleMenu() {
-      const navLinks = document.getElementById('nav-links');
-      navLinks.classList.toggle('active');
-  }
-}
+        
     </script>
 </head>
 <body>
@@ -131,7 +126,7 @@ $conn->close();
             <h1>League Fixtures</h1>
             <h2>League: <?php echo htmlspecialchars($league['league_name']); ?></h2>
             <div class="button-group">
-                <a href="?view=leaderboard&league_id=<?php echo $league_id; ?>">View Leaderboard</a>
+            <a href="view_leaderboard.php" class="btn">Leaderboard</a>
             </div>
         </header>
 
@@ -158,11 +153,11 @@ $conn->close();
                     <!-- Players Section -->
                     <?php if ($club_id > 0 && !empty($players)): ?>
                         <section>
-                            <h2>Players for <?php echo htmlspecialchars($club['c_name']); ?></h2>
+                            <h2>Players</h2>
                             <div class="card-container">
                                 <?php foreach ($players as $player): ?>
                                     <div class="card">
-                                        <h3><?php echo htmlspecialchars($player['name']); ?></h3>
+                                        <h3><?php echo htmlspecialchars($player['p_name']); ?></h3>
                                         <p>Age: <?php echo htmlspecialchars($player['age']); ?></p>
                                         <p>Position: <?php echo htmlspecialchars($player['position']); ?></p>
                                         <p>Phone: <?php echo htmlspecialchars($player['phone_number']); ?></p>

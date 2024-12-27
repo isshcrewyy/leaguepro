@@ -56,5 +56,9 @@ $conn->close();
             <?php endforeach; ?>
         </ul>
     </div>
+
+    <div class="button-group">
+            <a href="view_leaderboard.php" class="btn">Leaderboard</a>
+    </div>
 </body>
 </html>
