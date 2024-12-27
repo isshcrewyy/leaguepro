@@ -35,6 +35,14 @@ if (isset($_POST['register'])) {
     }
 }
 
+// Handle Logout
+if (isset($_GET['logout'])) {
+    session_unset();
+    session_destroy();
+    header("Location: proAdmin.php");
+    exit;
+}
+
 // Handle Login
 if (isset($_POST['login'])) {
     $email = $_POST['email'];
@@ -52,18 +60,13 @@ if (isset($_POST['login'])) {
         $_SESSION['admin_id'] = $user['admin_id'];
         $_SESSION['admin_name'] = $user['name'];
         $_SESSION['admin_email'] = $user['email'];
+        header("Location: proAdmin.php"); // Redirect to admin page
+        exit;
     } else {
         echo "<script>alert('Invalid email or password');</script>";
     }
 }
 
-// Handle Logout
-if (isset($_GET['logout'])) {
-    session_unset();
-    session_destroy();
-    header("Location: proAdmin.php");
-    exit;
-}
 // Handle user Approve/Deny Actions
 if (isset($_GET['action']) && isset($_GET['id'])) {
     $userId = (int) $_GET['id']; // Ensure ID is an integer
@@ -73,48 +76,60 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
         $updateQuery = "UPDATE user SET status = 'approved' WHERE userId = ?";
         $stmt = $conn->prepare($updateQuery);
         $stmt->bind_param("i", $userId);
-        $stmt->execute();
+        if ($stmt->execute()) {
+            header("Location: proAdmin.php"); // Redirect after successful action
+            exit;
+        }
     } elseif ($action == 'deny') {
         $deleteQuery = "DELETE FROM user WHERE userId = ?";
         $stmt = $conn->prepare($deleteQuery);
         $stmt->bind_param("i", $userId);
-        $stmt->execute();
-    }
-
-    // Redirect to avoid form resubmission
-    header("Location: proAdmin.php");
-    exit;
-}
-
-// Handle Form Actions (approve, deny, delete)
-if (isset($_GET['form_action']) && isset($_GET['id'])) {
-    $formId = (int)$_GET['id']; // Ensure the ID is an integer
-    $formAction = $_GET['form_action'];
-
-    switch ($formAction) {
-        case 'approve':
-            // Approve the form
-            $query = "UPDATE form SET status = 'approved' WHERE id = ?";
-            $stmt = $conn->prepare($query);
-            $stmt->bind_param("i", $formId);
-            $stmt->execute();
-            break;
-
-        case 'edit':
-            // Redirect to edit form page
-            header("Location: edit_form.php?id=$formId");
+        if ($stmt->execute()) {
+            header("Location: proAdmin.php"); // Redirect after successful action
             exit;
-
-        case 'delete':
-            // Delete the form
-            $query = "DELETE FROM form WHERE id = ?";
-            $stmt = $conn->prepare($query);
-            $stmt->bind_param("i", $formId);
-            $stmt->execute();
-            break;
+        }
     }
 }
 
+// If logged in, allow form actions
+if (isset($_SESSION['admin_id'])) {
+    if (isset($_GET['form_action']) && isset($_GET['form_id'])) {
+        $form_id = (int)$_GET['form_id'];
+        $formAction = $_GET['form_action'];
+
+        switch ($formAction) {
+            case 'approve':
+                // Approve the form
+                $query = "UPDATE form SET status = 'approved' WHERE form_id = ?";
+                $stmt = $conn->prepare($query);
+                $stmt->bind_param("i", $form_id);
+                if ($stmt->execute()) {
+                    echo "Form approved.";
+                    header("Location: proAdmin.php"); // Redirect after successful action
+                    exit;
+                }
+                break;
+
+            case 'delete':
+                // Delete the form
+                $query = "DELETE FROM form WHERE form_id = ?";
+                $stmt = $conn->prepare($query);
+                $stmt->bind_param("i", $form_id);
+                if ($stmt->execute()) {
+                    echo "Form deleted.";
+                    header("Location: proAdmin.php"); // Redirect after successful action
+                    exit;
+                }
+                break;
+
+            default:
+                echo "Invalid action.";
+                break;
+        }
+    }
+} else {
+    echo "Login in to manage User and Forms.";
+}
 ?>
 
 <!DOCTYPE html>
@@ -272,9 +287,7 @@ if (isset($_GET['form_action']) && isset($_GET['id'])) {
                             <th>User ID</th>
                             <th>League Name</th>
                             <th>Duration</th>
-                            <th>Num Teams</th>
                             <th>Max Teams</th>
-                            <th>One League</th>
                             <th>Start Date</th>
                             <th>End Date</th>
                             <th>Experience</th>
@@ -290,9 +303,7 @@ if (isset($_GET['form_action']) && isset($_GET['id'])) {
                                 <td><?php echo htmlspecialchars($form['userId']); ?></td>
                                 <td><?php echo htmlspecialchars($form['league_name']); ?></td>
                                 <td><?php echo htmlspecialchars($form['duration']); ?></td>
-                                <td><?php echo htmlspecialchars($form['num_teams']); ?></td>
                                 <td><?php echo htmlspecialchars($form['max_teams']); ?></td>
-                                <td><?php echo htmlspecialchars($form['one_league']); ?></td>
                                 <td><?php echo htmlspecialchars($form['start_date']); ?></td>
                                 <td><?php echo htmlspecialchars($form['end_date']); ?></td>
                                 <td><?php echo htmlspecialchars($form['experience']); ?></td>
@@ -300,9 +311,9 @@ if (isset($_GET['form_action']) && isset($_GET['id'])) {
                                 <td><?php echo htmlspecialchars($form['rules']); ?></td>
                                 <td><?php echo htmlspecialchars($form['status']); ?></td>
                                 <td>
-                                    <a href="?form_action=approve&id=<?php echo $form['id']; ?>">Approve</a> |
+                                    <a href="?form_action=approve&form_id=<?php echo $form['form_id']; ?>">Approve</a> |
                                     
-                                    <a href="?form_action=delete&id=<?php echo $form['id']; ?>" 
+                                    <a href="?form_action=delete&form_id=<?php echo $form['form_id']; ?>" 
                                        onclick="return confirm('Are you sure you want to delete this form?');">Delete</a>
                                 </td>
                             </tr>
@@ -328,9 +339,7 @@ if (isset($_GET['form_action']) && isset($_GET['id'])) {
                             <th>User ID</th>
                             <th>League Name</th>
                             <th>Duration</th>
-                            <th>Num Teams</th>
                             <th>Max Teams</th>
-                            <th>One League</th>
                             <th>Start Date</th>
                             <th>End Date</th>
                             <th>Experience</th>
@@ -346,9 +355,7 @@ if (isset($_GET['form_action']) && isset($_GET['id'])) {
                                 <td><?php echo htmlspecialchars($form['userId']); ?></td>
                                 <td><?php echo htmlspecialchars($form['league_name']); ?></td>
                                 <td><?php echo htmlspecialchars($form['duration']); ?></td>
-                                <td><?php echo htmlspecialchars($form['num_teams']); ?></td>
                                 <td><?php echo htmlspecialchars($form['max_teams']); ?></td>
-                                <td><?php echo htmlspecialchars($form['one_league']); ?></td>
                                 <td><?php echo htmlspecialchars($form['start_date']); ?></td>
                                 <td><?php echo htmlspecialchars($form['end_date']); ?></td>
                                 <td><?php echo htmlspecialchars($form['experience']); ?></td>
@@ -356,7 +363,7 @@ if (isset($_GET['form_action']) && isset($_GET['id'])) {
                                 <td><?php echo htmlspecialchars($form['rules']); ?></td>
                                 <td><?php echo htmlspecialchars($form['status']); ?></td>
                                 <td>
-                                    <a href="?form_action=delete&id=<?php echo $form['id']; ?>" 
+                                    <a href="?form_action=delete&id=<?php echo $form['form_id']; ?>" 
                                        onclick="return confirm('Are you sure you want to delete this form?');">Delete</a>
                                 </td>
                             </tr>

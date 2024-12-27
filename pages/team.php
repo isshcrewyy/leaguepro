@@ -1,77 +1,162 @@
 <?php
+// Start session at the beginning
+session_start();
+
 // Database connection
 include 'db_connection.php';
 
+// Check if user is logged in and has necessary session variables
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['league_id'])) {
+    header("Location: login.php");
+    exit();
+}
 
-// SQL query to fetch players and coaches
-$sql_players = "SELECT player_id, name, age, position, club_id, phone_number FROM player";
-$sql_coaches = "SELECT coach_id, name, age, experience, club_id, phone_number FROM coach";
+$user_id = $_SESSION['user_id'];
+$league_id = $_SESSION['league_id'];
 
-// Execute queries
-$players_result = $conn->query($sql_players);
-$coaches_result = $conn->query($sql_coaches);
+// Verify user has permission to access this league
+$stmt = $conn->prepare("SELECT * FROM league_users WHERE user_id = ? AND league_id = ?");
+$stmt->bind_param("ii", $user_id, $league_id);
+$stmt->execute();
+$result = $stmt->get_result();
 
-// Create an associative array to store data
+if ($result->num_rows === 0) {
+    die("You don't have permission to access this league.");
+}
+
+// SQL queries with prepared statements for players and coaches
+$sql_players = $conn->prepare("SELECT player_id, name, age, position, club_id, phone_number 
+                              FROM player 
+                              WHERE league_id = ? AND EXISTS (
+                                  SELECT 1 FROM league_users 
+                                  WHERE league_users.league_id = player.league_id 
+                                  AND league_users.user_id = ?
+                              )");
+
+$sql_coaches = $conn->prepare("SELECT coach_id, name, age, experience, club_id, phone_number 
+                             FROM coach 
+                             WHERE league_id = ? AND EXISTS (
+                                 SELECT 1 FROM league_users 
+                                 WHERE league_users.league_id = coach.league_id 
+                                 AND league_users.user_id = ?
+                             )");
+
+// Execute queries with user verification
+$sql_players->bind_param("ii", $league_id, $user_id);
+$sql_players->execute();
+$players_result = $sql_players->get_result();
+
+$sql_coaches->bind_param("ii", $league_id, $user_id);
+$sql_coaches->execute();
+$coaches_result = $sql_coaches->get_result();
+
+// Create arrays to store data
 $players = [];
 $coaches = [];
 
-if ($players_result->num_rows > 0) {
-    while ($row = $players_result->fetch_assoc()) {
-        $players[] = $row;
+while ($row = $players_result->fetch_assoc()) {
+    $players[] = $row;
+}
+
+while ($row = $coaches_result->fetch_assoc()) {
+    $coaches[] = $row;
+}
+
+// Handle player removal
+if (isset($_POST['action']) && $_POST['action'] == 'remove' && isset($_POST['type'])) {
+    if ($_POST['type'] == 'player') {
+        $player_id = $_POST['id'];
+        
+        // Verify user has permission to remove this player
+        $stmt = $conn->prepare("DELETE FROM player 
+                              WHERE player_id = ? 
+                              AND league_id = ? 
+                              AND EXISTS (
+                                  SELECT 1 FROM league_users 
+                                  WHERE league_users.league_id = player.league_id 
+                                  AND league_users.user_id = ?
+                              )");
+        $stmt->bind_param("iii", $player_id, $league_id, $user_id);
+        $stmt->execute();
+        
+        if ($stmt->affected_rows > 0) {
+            echo "<script>alert('Player removed successfully!'); window.location.href = 'team.php';</script>";
+        } else {
+            echo "<script>alert('Error: Unable to remove player or permission denied.'); window.history.back();</script>";
+        }
+    } elseif ($_POST['type'] == 'coach') {
+        $coach_id = $_POST['id'];
+        
+        // Verify user has permission to remove this coach
+        $stmt = $conn->prepare("DELETE FROM coach 
+                              WHERE coach_id = ? 
+                              AND league_id = ? 
+                              AND EXISTS (
+                                  SELECT 1 FROM league_users 
+                                  WHERE league_users.league_id = coach.league_id 
+                                  AND league_users.user_id = ?
+                              )");
+        $stmt->bind_param("iii", $coach_id, $league_id, $user_id);
+        $stmt->execute();
+        
+        if ($stmt->affected_rows > 0) {
+            echo "<script>alert('Coach removed successfully!'); window.location.href = 'team.php';</script>";
+        } else {
+            echo "<script>alert('Error: Unable to remove coach or permission denied.'); window.history.back();</script>";
+        }
     }
 }
 
-if ($coaches_result->num_rows > 0) {
-    while ($row = $coaches_result->fetch_assoc()) {
-        $coaches[] = $row;
-    }
-}
-
-
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $type = $_POST['type']; // Determines whether it's a player or a coach
+// Handle form submissions for adding players/coaches
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['type'])) {
+    $type = $_POST['type'];
 
     if ($type === 'player') {
-        // Player form data
         $name = $_POST['name'];
         $age = $_POST['age'];
         $position = $_POST['position'];
         $club_id = $_POST['club_id'];
         $phone_number = $_POST['phone_number'];
 
-        // Insert into player table
-        $stmt = $conn->prepare("INSERT INTO player (name, age, position, club_id, phone_number) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("sisss", $name, $age, $position, $club_id, $phone_number);
+        // Insert player with league_id
+        $stmt = $conn->prepare("INSERT INTO player (name, age, position, club_id, phone_number, league_id) 
+                              SELECT ?, ?, ?, ?, ?, ? 
+                              FROM league_users 
+                              WHERE user_id = ? AND league_id = ?");
+        $stmt->bind_param("sississi", $name, $age, $position, $club_id, $phone_number, $league_id, $user_id, $league_id);
 
-        if ($stmt->execute()) {
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
             echo "<script>alert('Player added successfully!'); window.location.href = 'team.php';</script>";
         } else {
-            echo "<script>alert('Error adding player: " . $stmt->error . "'); window.history.back();</script>";
+            echo "<script>alert('Error adding player: Permission denied'); window.history.back();</script>";
         }
     } elseif ($type === 'coach') {
-        // Coach form data
         $name = $_POST['name'];
         $experience = $_POST['experience'];
         $age = $_POST['age'];
         $club_id = $_POST['club_id'];
         $phone_number = $_POST['phone_number'];
 
-        // Insert into coach table
-        $stmt = $conn->prepare("INSERT INTO coach (name, experience, age, club_iD, phone_number) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("siiss", $name, $experience, $age, $club_id, $phone_number);
+        // Insert coach with league_id
+        $stmt = $conn->prepare("INSERT INTO coach (name, experience, age, club_id, phone_number, league_id) 
+                              SELECT ?, ?, ?, ?, ?, ? 
+                              FROM league_users 
+                              WHERE user_id = ? AND league_id = ?");
+        $stmt->bind_param("siissiii", $name, $experience, $age, $club_id, $phone_number, $league_id, $user_id, $league_id);
 
-        if ($stmt->execute()) {
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
             echo "<script>alert('Coach added successfully!'); window.location.href = 'team.php';</script>";
         } else {
-            echo "<script>alert('Error adding coach: " . $stmt->error . "'); window.history.back();</script>";
+            echo "<script>alert('Error adding coach: Permission denied'); window.history.back();</script>";
         }
-    } else {
-        echo "<script>alert('Invalid form submission!'); window.history.back();</script>";
     }
-
-    $stmt->close();
-    $conn->close();
 }
+
+// Close all prepared statements
+if (isset($stmt)) $stmt->close();
+$sql_players->close();
+$sql_coaches->close();
+$conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -85,16 +170,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <body>
 
 <nav class="navbar">
-    <a href="org_dashboard.php" class="logo">Organizer</a>
-    <span class="menu-toggle" onclick="toggleMenu()">☰</span> <!-- Hamburger Icon -->
-    <ul id="nav-links" class="hidden">
-        <li><a href="edit_league.php">Edit League</a></li>
-        <li><a href="team.php">Your Team</a></li>
-        <li><a href="add_game.php">Add Game</a></li>
-        <li><a href="#leaderboard">Update Leaderboard</a></li>
-        <li><a href="#logout">Logout</a></li>
-    </ul>
-</nav>
+        <a href="org_dashboard.php" class="logo">Organizer</a>
+        <span class="menu-toggle" onclick="toggleMenu()">☰</span>
+        <ul id="nav-links">
+        <li><a href="club.php">Your Clubs</a></li>
+            <li><a href="team.php">Your Team</a></li>
+            <li><a href="add_game.php">Add Game</a></li>
+            <li><a href="leaderboard.php">Leaderboard</a></li>
+            <li>
+                <form action="logout.php" method="post" style="display:inline;">
+                    <button type="submit" class="logout-btn">Logout</button>
+                </form>
+            </li>
+        </ul>
+    </nav>
 
 <div class="container">
     <h1>Your Team</h1>
@@ -128,23 +217,42 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($players as $player): ?>
-                    <tr>
-                    <td><?php echo $player['player_id']; ?></td>
-                        <td><?php echo $player['name']; ?></td>
-                        <td><?php echo $player['age']; ?></td>
-                        <td><?php echo $player['position']; ?></td>
-                        <td><?php echo $player['club_id']; ?></td>
-                        <td><?php echo $player['phone_number']; ?></td>
-                        <td>
-    
-    <a href="edit_team.php?player_id=<?php echo $player['player_id']; ?>">Edit</a>
-</td>
-
-
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
+    <?php foreach ($players as $player): ?>
+        <tr id="player_<?php echo $player['player_id']; ?>">
+            <td><?php echo $player['player_id']; ?></td>
+            <td>
+                <span class="display-value"><?php echo htmlspecialchars($player['name']); ?></span>
+                <input type="text" class="edit-input" value="<?php echo htmlspecialchars($player['name']); ?>" style="display: none;">
+            </td>
+            <td>
+                <span class="display-value"><?php echo $player['age']; ?></span>
+                <input type="number" class="edit-input" value="<?php echo $player['age']; ?>" style="display: none;">
+            </td>
+            <td>
+                <span class="display-value"><?php echo htmlspecialchars($player['position']); ?></span>
+                <input type="text" class="edit-input" value="<?php echo htmlspecialchars($player['position']); ?>" style="display: none;">
+            </td>
+            <td>
+                <span class="display-value"><?php echo $player['club_id']; ?></span>
+                <input type="number" class="edit-input" value="<?php echo $player['club_id']; ?>" style="display: none;">
+            </td>
+            <td>
+                <span class="display-value"><?php echo htmlspecialchars($player['phone_number']); ?></span>
+                <input type="text" class="edit-input" value="<?php echo htmlspecialchars($player['phone_number']); ?>" style="display: none;">
+            </td>
+            <td>
+                <button class="edit-btn" onclick="toggleEdit(this, 'player', <?php echo $player['player_id']; ?>)">Edit</button>
+                <button class="save-btn" onclick="saveChanges(this, 'player', <?php echo $player['player_id']; ?>)" style="display: none;">Save</button>
+                <button class="cancel-btn" onclick="cancelEdit(this, 'player', <?php echo $player['player_id']; ?>)" style="display: none;">Cancel</button>
+                <form method="POST" action="team.php" onsubmit="return confirm('Are you sure you want to remove this record?');" style="display:inline;">
+                    <input type="hidden" name="action" value="remove">
+                    <input type="hidden" name="id" value="<?php echo $player['player_id']; ?>">
+                    <input type="submit" value="Remove">
+                </form>
+            </td>
+        </tr>
+    <?php endforeach; ?>
+</tbody>
         </table>
     </div>
 
@@ -163,22 +271,42 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($coaches as $coach): ?>
-                    <tr>
-                    <td><?php echo $coach['coach_id']; ?></td>
-                        <td><?php echo $coach['name']; ?></td>
-                        <td><?php echo $coach['age']; ?></td>
-                        <td><?php echo $coach['experience']; ?></td>
-                        <td><?php echo $coach['club_id']; ?></td>
-                        <td><?php echo $coach['phone_number']; ?></td>
-                        <td>
-    <!-- Edit Button -->
-    <a href="edit_team.php?coach_id=<?php echo $coach['coach_id']; ?>">Edit</a>
-</td>
-
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
+    <?php foreach ($coaches as $coach): ?>
+        <tr id="coach_<?php echo $coach['coach_id']; ?>">
+            <td><?php echo $coach['coach_id']; ?></td>
+            <td>
+                <span class="display-value"><?php echo htmlspecialchars($coach['name']); ?></span>
+                <input type="text" class="edit-input" value="<?php echo htmlspecialchars($coach['name']); ?>" style="display: none;">
+            </td>
+            <td>
+                <span class="display-value"><?php echo $coach['age']; ?></span>
+                <input type="number" class="edit-input" value="<?php echo $coach['age']; ?>" style="display: none;">
+            </td>
+            <td>
+                <span class="display-value"><?php echo $coach['experience']; ?></span>
+                <input type="number" class="edit-input" value="<?php echo $coach['experience']; ?>" style="display: none;">
+            </td>
+            <td>
+                <span class="display-value"><?php echo $coach['club_id']; ?></span>
+                <input type="number" class="edit-input" value="<?php echo $coach['club_id']; ?>" style="display: none;">
+            </td>
+            <td>
+                <span class="display-value"><?php echo htmlspecialchars($coach['phone_number']); ?></span>
+                <input type="text" class="edit-input" value="<?php echo htmlspecialchars($coach['phone_number']); ?>" style="display: none;">
+            </td>
+            <td>
+                <button class="edit-btn" onclick="toggleEdit(this, 'coach', <?php echo $coach['coach_id']; ?>)">Edit</button>
+                <button class="save-btn" onclick="saveChanges(this, 'coach', <?php echo $coach['coach_id']; ?>)" style="display: none;">Save</button>
+                <button class="cancel-btn" onclick="cancelEdit(this, 'coach', <?php echo $coach['coach_id']; ?>)" style="display: none;">Cancel</button>
+                <form method="POST" action="team.php" onsubmit="return confirm('Are you sure you want to remove this record?');" style="display:inline;">
+                    <input type="hidden" name="action" value="remove">
+                    <input type="hidden" name="id" value="<?php echo $coach['coach_id']; ?>">
+                    <input type="submit" value="Remove">
+                </form>
+            </td>
+        </tr>
+    <?php endforeach; ?>
+</tbody>
         </table>
     </div>
 </div>
@@ -195,45 +323,48 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         </div>
 
         <!-- Add Player Form -->
-        <form id="playerForm" style="display: block;">
-            <label for="player_name">Player Name *</label>
-            <input type="text" id="player_name" name="name" placeholder="Enter Name" required />
+        <form id="playerForm" method="POST" action="team.php" style="display: block;">
+        <input type="hidden" name="type" value="player">
+        <label for="player_name">Player Name *</label>
+        <input type="text" id="player_name" name="name" placeholder="Enter Name" required />
 
-            <label for="age">Age *</label>
-            <input type="number" id="age" name="age" placeholder="Enter Age" required />
+        <label for="player_age">Age *</label>
+        <input type="number" id="player_age" name="age" placeholder="Enter Age" required />
 
-            <label for="position">Position *</label>
-            <input type="text" id="position" name="position" placeholder="Forward, Wing, etc." required />
+        <label for="position">Position *</label>
+        <input type="text" id="position" name="position" placeholder="Forward, Wing, etc." required />
 
-            <label for="club_id">Club ID *</label>
-            <input type="number" id="club_id" name="club_id" placeholder="Enter Club ID" required />
+        <label for="club_id">Club ID *</label>
+        <input type="number" id="club_id" name="club_id" placeholder="Enter Club ID" required />
 
-            <label for="phone_number">Phone Number *</label>
-            <input type="text" id="phone_number" name="phone_number" placeholder="Enter Phone Number" required />
-            
-            
-            <button type="submit" class="btn-submit">Add Player</button>
+        <label for="phone_number">Phone Number *</label>
+        <input type="text" id="phone_number" name="phone_number" placeholder="Enter Phone Number" required />
+
+        <button type="submit" class="btn-submit">Add Player</button>
         </form>
+
 
         <!-- Add Coach Form -->
-        <form id="coachForm" style="display: none;">
-            <label for="coach_name">Coach Name *</label>
-            <input type="text" id="coach_name" name="name" placeholder="Enter Name" required />
+        <form id="coachForm" method="POST" action="team.php" style="display: none;">
+        <input type="hidden" name="type" value="coach">
+        <label for="coach_name">Coach Name *</label>
+        <input type="text" id="coach_name" name="name" placeholder="Enter Name" required />
 
-            <label for="experience">Experience *</label>
-            <input type="text" id="experience" name="experience" placeholder="Enter Experience" required />
+        <label for="experience">Experience *</label>
+        <input type="text" id="experience" name="experience" placeholder="Enter Experience" required />
 
-            <label for="age">Age *</label>
-            <input type="number" id="age" name="age" placeholder="Enter Age" required />
+        <label for="coach_age">Age *</label>
+        <input type="number" id="coach_age" name="age" placeholder="Enter Age" required />
 
-            <label for="club_id_coach">Club ID *</label>
-            <input type="number" id="club_id_coach" name="club_id" placeholder="Enter Club ID" required />
+        <label for="club_id_coach">Club ID *</label>
+        <input type="number" id="club_id_coach" name="club_id" placeholder="Enter Club ID" required />
 
-            <label for="phone_number_coach">Phone Number *</label>
-            <input type="text" id="phone_number_coach" name="phone_number" placeholder="Enter Phone Number" required />
+        <label for="phone_number_coach">Phone Number *</label>
+        <input type="text" id="phone_number_coach" name="phone_number" placeholder="Enter Phone Number" required />
 
-            <button type="submit" class="btn-submit">Add Coach</button>
+        <button type="submit" class="btn-submit">Add Coach</button>
         </form>
+
     </div>
 </div>
 

@@ -1,44 +1,58 @@
 <?php
 session_start();
-require '../src/PHPMailer.php';
-require '../src/SMTP.php';
-require '../src/Exception.php';
-
 require 'db_connection.php'; // Include your database connection
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
 // Initialize message variable
 $message = '';
+
 if (isset($_POST['login'])) {
+    // Get form input
     $email = trim($_POST['email']);
     $password = trim($_POST['password']);
 
-    // Fetch user details
+    // Check if email and password are provided
+    if (empty($email) || empty($password)) {
+        $message = 'Email or password is missing.';
+    }
+
+    // Fetch user details from database
     $stmt = $conn->prepare("SELECT * FROM user WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
-    $user = $result->fetch_assoc();
 
-    if ($user && password_verify($password, $user['password'])) {
+    // Debugging: Check if user is found
+    if ($result->num_rows > 0) {
+        $user = $result->fetch_assoc();
+        echo "User found: " . $user['email'] . "<br>"; // Debugging: Display user email
+    } else {
+        echo "No user found with that email";  // Debugging: No user found
+    }
+
+    // If the user exists, verify password
+    if (isset($user) && password_verify($password, $user['password'])) {
+        echo "Password is correct"; // Debugging: password verification
         if ($user['status'] === 'approved') {
+            // Start session and redirect to dashboard
             session_regenerate_id(true);
-            $_SESSION['user_id'] = $user['userId'];
-            $_SESSION['name'] = htmlspecialchars($user['name']);
-            $_SESSION['email'] = htmlspecialchars($user['email']);
+            $_SESSION['userId'] = $user['userId'];
+            $_SESSION['name'] = $user['name'];
+            $_SESSION['email'] = $user['email'];
+
+            // Debugging: Check if session variables are set
+            echo "Session variables set. User ID: " . $_SESSION['userId'] . "<br>";
+            
             header('Location: org_dashboard.php');
             exit();
         } else {
             $message = 'Your account is not approved yet. Please wait for approval.';
         }
     } else {
-        $message = 'Invalid email or password.';
+        $message = 'Invalid email or password.'; // Invalid credentials
     }
 }
-
-
 ?>
 
 <!DOCTYPE html>

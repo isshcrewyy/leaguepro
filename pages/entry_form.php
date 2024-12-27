@@ -32,18 +32,33 @@ if (isset($_POST['submit_form'])) {
     $experience = filter_var($_POST['experience'], FILTER_SANITIZE_STRING);
     $location = filter_var($_POST['location'], FILTER_SANITIZE_STRING);
     $rules = filter_var($_POST['rules'], FILTER_SANITIZE_STRING);
+    $season = $_POST['season']; // Assuming this is an additional field in the form for the season
 
     // Insert into 'form' table, including the logged-in user's ID
     $stmt = $conn->prepare("INSERT INTO form (league_name, userId, duration, max_teams, one_league, start_date, end_date, experience, location, rules) VALUES (?,?,?,?,?,?,?,?,?,?)");
     $stmt->bind_param("siisisssss", $league_name, $userId, $duration, $max_teams, $one_league, $start_date, $end_date, $experience, $location, $rules);
 
     if ($stmt->execute()) {
-        echo "<script>alert('Form submitted successfully!');</script>";
-        header("Location: login.php");
-        exit;
+        // Insert into 'league' table with the common details
+      // Insert into 'league' table with the additional details
+$league_stmt = $conn->prepare("INSERT INTO league (league_name, userId, start_date, end_date, season, duration, max_teams, location) VALUES (?,?,?,?,?,?,?,?)");
+$league_stmt->bind_param("sissssis", $league_name, $userId, $start_date, $end_date, $season, $duration, $max_teams, $location);
+
+if ($league_stmt->execute()) {
+    echo "<script>alert('Form and league details submitted successfully!');</script>";
+    header("Location: login.php");
+    exit;
+} else {
+    echo "<script>alert('Error inserting into the league table.');</script>";
+}
+
+
+
+        $league_stmt->close();
     } else {
         echo "<script>alert('Error submitting the form. Please try again.');</script>";
     }
+
     $stmt->close();
 }
 
@@ -67,6 +82,7 @@ function calculateEndDate($start_date, $duration) {
     return $start_date_obj->format('Y-m-d');
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

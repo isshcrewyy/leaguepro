@@ -1,139 +1,281 @@
-/* Navbar Styling */
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f5f5f5;
+  line-height: 1.6;
+  padding: 20px;
+}
+
+/* Header styles */
+h2 {
+  color: #34495e;
+  margin: 25px 0 15px 0;
+  text-align: center;
+}
+
+/* Navigation bar */
 .navbar {
-  background-color: #333;
+  background-color: #2c3e50;
+  padding: 15px 30px;
+  margin-bottom: 30px;
+  border-radius: 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
 }
 
-.navbar .logo {
-  color: white;
-  font-size: 1.5rem;
-  text-decoration: none;
-}
-
-.navbar ul {
-  list-style-type: none;
-  display: flex;
-  margin: 0;
-}
-
-.navbar ul li {
-  margin: 0 1rem;
-}
-
-.navbar ul li a {
+.logo {
   color: white;
   text-decoration: none;
-  font-size: 1.1rem;
-}
-
-.navbar ul li a:hover {
-  color: #f1c40f;
+  font-size: 1.5em;
+  font-weight: bold;
 }
 
 .menu-toggle {
   display: none;
-  font-size: 2rem;
-  cursor: pointer;
   color: white;
+  font-size: 1.5em;
+  cursor: pointer;
 }
 
-.navbar.active ul {
-  display: block;
-}
-
-.navbar ul {
+#nav-links {
+  list-style: none;
   display: flex;
+  gap: 20px;
+  align-items: center;
 }
 
-/* Toggle the menu for mobile devices */
-@media (max-width: 768px) {
-  .navbar ul {
-    display: none;
-    flex-direction: column;
-    width: 100%;
-    position: absolute;
-    background-color: #333;
-    top: 60px;
-    left: 0;
-  }
-
-  .menu-toggle {
-    display: block;
-  }
-
-  .navbar.active ul {
-    display: block;
-  }
-
-  .navbar ul li {
-    text-align: center;
-    margin: 1rem 0;
-  }
+#nav-links li a {
+  color: white;
+  text-decoration: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
 }
 
-/* Section Container */
+#nav-links li a:hover {
+  background-color: #34495e;
+}
+
+/* Section container */
 .section-container {
-  margin: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-.section,
-.remove-section {
-  background-color: #f9f9f9;
-  padding: 2rem;
+.section {
+  background-color: white;
+  padding: 25px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
+  margin-bottom: 30px;
 }
 
-h2 {
-  text-align: center;
-  margin-bottom: 1rem;
-  font-size: 1.8rem;
-}
-
+/* Form styles */
 form {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  gap: 15px;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-form label {
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
+label {
+  color: #2c3e50;
+  font-weight: 500;
 }
 
-form input[type="number"],
-form input[type="text"],
-form input[type="date"],
-form input[type="time"] {
-  padding: 0.8rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ccc;
+input[type="number"],
+input[type="text"],
+input[type="date"],
+input[type="time"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
   border-radius: 4px;
+  font-size: 1em;
 }
 
-form input[type="submit"] {
-  background-color: #4CAF50;
+input[type="submit"],
+.logout-btn {
+  background-color: #3498db;
   color: white;
-  padding: 0.8rem;
+  padding: 10px 20px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 1.1rem;
+  font-size: 1em;
+  transition: background-color 0.3s;
 }
 
-form input[type="submit"]:hover {
-  background-color: #45a049;
+input[type="submit"]:hover {
+  background-color: #2980b9;
 }
 
-form input[type="submit"]:active {
-  background-color: #3e8e41;
+.logout-btn {
+  background-color: #e74c3c;
 }
 
-.remove-section form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.logout-btn:hover {
+  background-color: #c0392b;
+}
+
+/* Table styles */
+table {
+  width: 100%;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-collapse: collapse;
+  margin: 20px 0;
+  overflow-x: auto;
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #34495e;
+  color: white;
+  font-weight: 500;
+}
+
+tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Action buttons in table */
+td a, td input[type="submit"] {
+  padding: 6px 12px;
+  margin: 0 5px;
+  font-size: 0.9em;
+  text-decoration: none;
+  display: inline-block;
+}
+
+td a {
+  background-color: #3498db;
+  color: white;
+  border-radius: 4px;
+}
+
+td input[type="submit"] {
+  background-color: #e74c3c;
+}
+
+td a:hover {
+  background-color: #2980b9;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .menu-toggle {
+      display: block;
+  }
+
+  #nav-links {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background-color: #2c3e50;
+      padding: 20px;
+  }
+
+  #nav-links.active {
+      display: flex;
+  }
+
+  .navbar {
+      position: relative;
+      flex-wrap: wrap;
+  }
+
+  table {
+      display: block;
+      overflow-x: auto;
+  }
+
+  .section {
+      padding: 15px;
+  }
+
+  input[type="submit"], 
+  td a {
+      width: 100%;
+      margin: 5px 0;
+      text-align: center;
+  }
+
+  td {
+      min-width: 120px;
+  }
+}
+
+/* Focus states */
+input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+}
+
+/* Form validation styles */
+input:invalid {
+  border-color: #e74c3c;
+}
+
+/* Animation for menu toggle */
+@keyframes slideDown {
+  from {
+      opacity: 0;
+      transform: translateY(-10px);
+  }
+  to {
+      opacity: 1;
+      transform: translateY(0);
+  }
+}
+
+#nav-links.active {
+  animation: slideDown 0.3s ease-out;
+}
+
+.edit-input {
+    width: 90%;
+    padding: 5px;
+    margin: 2px;
+}
+
+.edit-btn, .save-btn, .cancel-btn {
+    padding: 5px 10px;
+    margin: 2px;
+    cursor: pointer;
+}
+
+.save-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+}
+
+.cancel-btn {
+    background-color: #f44336;
+    color: white;
+    border: none;
+}
+
+.display-value {
+    display: inline-block;
+    padding: 5px;
 }

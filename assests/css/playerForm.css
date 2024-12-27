@@ -1,113 +1,137 @@
-/* General Styling */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
+/* Reset and base styles */
+* {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+body {
+  background-color: #f5f5f5;
+  line-height: 1.6;
+  padding: 20px;
 }
 
 .container {
-    width: 90%;
-    margin: auto;
-    margin-top: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
-h1, h2 {
-    color: #2c3e50;
-    text-align: center;
-}
-
+/* Navigation Bar */
 .navbar {
+    background-color: #2c3e50;
+    padding: 15px 30px;
+    margin-bottom: 30px;
+    border-radius: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #2c3e50;
-    padding: 10px 20px;
+  }
+  
+  .navbar .logo {
     color: white;
-}
-
-.navbar .logo {
-    font-size: 1.5rem;
-    color: #f4f4f4;
     text-decoration: none;
+    font-size: 1.5rem;
     font-weight: bold;
-}
-
-.navbar .menu-toggle {
+  }
+  
+  .menu-toggle {
     display: none;
+    color: white;
     font-size: 1.5rem;
     cursor: pointer;
-    color: white;
-}
-
-.navbar ul {
+  }
+  #nav-links {
     list-style: none;
-    margin: 0;
-    padding: 0;
     display: flex;
-    gap: 15px;
-}
+    gap: 20px;
+    align-items: center;
+  }
 
-.navbar ul li a {
-    text-decoration: none;
+  #nav-links li a {
     color: white;
-    font-size: 1rem;
-    padding: 5px 10px;
-    border-radius: 5px;
+    text-decoration: none;
+    padding: 8px 15px;
+    border-radius: 4px;
     transition: background-color 0.3s;
-}
-
-.navbar ul li a:hover {
+  }
+  
+  #nav-links li a:hover {
     background-color: #34495e;
+  }
+  .logout-btn {
+    background-color: #e53e3e;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .logout-btn:hover {
+    background-color: #c53030;
+  }
+  
+/* Headings */
+h1 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2em;
 }
 
-/* Responsive Navbar */
-@media screen and (max-width: 768px) {
-    .navbar ul {
-        display: none;
-        flex-direction: column;
-        background-color: #2c3e50;
-        position: absolute;
-        top: 50px;
-        right: 20px;
-        width: 200px;
-    }
-
-    .navbar ul.hidden {
-        display: flex;
-    }
-
-    .navbar .menu-toggle {
-        display: block;
-    }
+h2 {
+    color: #34495e;
+    margin: 20px 0;
+    font-size: 1.5em;
 }
 
-/* Tab Navigation */
+/* Tabs */
 .tabs {
     display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
     justify-content: center;
-    margin-bottom: 20px;
 }
 
 .tab-button {
-    padding: 10px 20px;
-    background-color: #ecf0f1;
-    border: 1px solid #bdc3c7;
+    padding: 12px 24px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
     cursor: pointer;
-    margin-right: 5px;
-    transition: background-color 0.3s;
+    font-size: 1em;
+    transition: all 0.3s ease;
 }
 
-.tab-button:hover,
+.tab-button:hover {
+    background-color: #e9ecef;
+}
+
 .tab-button.active {
     background-color: #3498db;
     color: white;
+    border-color: #3498db;
 }
 
-/* Table Styling */
+.tab-content {
+    display: none;
+    background-color: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in;
+}
+
+/* Tables */
 .table-container {
-    margin: 20px auto;
-    max-width: 100%;
+    margin-bottom: 40px;
     overflow-x: auto;
 }
 
@@ -116,60 +140,198 @@ table {
     border-collapse: collapse;
     margin-bottom: 20px;
     background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-table thead {
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
+th {
     background-color: #34495e;
     color: white;
+    font-weight: 500;
 }
 
-table th, table td {
-    padding: 10px;
-    text-align: left;
-    border: 1px solid #ddd;
+tr:hover {
+    background-color: #f8f9fa;
 }
 
-table tbody tr:nth-child(even) {
-    background-color: #f2f2f2;
-}
-
-/* Form Styling */
+/* Forms */
 form {
-    background-color: white;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     max-width: 600px;
-    margin: auto;
+    margin: 0 auto;
 }
 
-form label {
+label {
     display: block;
     margin-bottom: 8px;
-    font-weight: bold;
     color: #2c3e50;
+    font-weight: 500;
 }
 
-form input {
+input[type="text"],
+input[type="number"],
+input[type="tel"] {
     width: 100%;
     padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1em;
 }
 
-form .btn-submit {
+input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+}
+
+.btn-submit {
     background-color: #3498db;
     color: white;
+    padding: 12px 24px;
     border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 1em;
+    width: 100%;
     transition: background-color 0.3s;
 }
 
-form .btn-submit:hover {
+.btn-submit:hover {
     background-color: #2980b9;
+}
+
+/* Action buttons */
+table a {
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    color: white;
+    background-color: #3498db;
+    transition: background-color 0.3s;
+}
+
+table a:hover {
+    background-color: #2980b9;
+}
+
+.logout-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.logout-btn:hover {
+    background-color: #c0392b;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+
+     #nav-links {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background-color: #2c3e50;
+      padding: 20px;
+  }
+
+  #nav-links.active {
+      display: flex;
+  }
+
+  .navbar {
+      position: relative;
+      flex-wrap: wrap;
+  }
+
+    .tabs {
+        flex-direction: column;
+    }
+
+    .tab-button {
+        width: 100%;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    td, th {
+        min-width: 120px;
+    }
+
+    form {
+        padding: 15px;
+    }
+}
+
+/* Form validation styles */
+input:invalid {
+    border-color: #e74c3c;
+}
+
+input:invalid:focus {
+    box-shadow: 0 0 5px rgba(231, 76, 60, 0.3);
+}
+
+/* Required field indicator */
+label::after {
+    content: " *";
+    color: #e74c3c;
+}
+
+.edit-input {
+    width: 90%;
+    padding: 5px;
+    margin: 2px;
+}
+
+.edit-btn, .save-btn, .cancel-btn {
+    padding: 5px 10px;
+    margin: 2px;
+    cursor: pointer;
+}
+
+.save-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+}
+
+.cancel-btn {
+    background-color: #f44336;
+    color: white;
+    border: none;
 }

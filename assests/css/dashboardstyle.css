@@ -1,163 +1,225 @@
-/* Reset some default browser styles */
-body, h1, h2, h3, p, ul, li, button {
+/* Reset and Base Styles */
+* {
   margin: 0;
   padding: 0;
-  list-style: none;
+  box-sizing: border-box;
 }
 
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f0f2f5;
   color: #333;
+  line-height: 1.6;
 }
 
-.button-container-3 {
+/* Main Heading */
+h1 {
   text-align: center;
-  margin: 20px 0;
+  color: #2c5282;
+  padding: 1.5rem;
+  font-size: 2.2rem;
+  margin-bottom: 1rem;
 }
 
+/* Navigation Bar */
 .navbar {
-  background-color: #0044cc;
-  padding: 15px;
+  background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+  padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.navbar a {
+.navbar .logo {
   color: white;
   text-decoration: none;
-  padding: 10px 15px;
-  transition: background 0.3s;
-}
-
-.navbar a:hover {
-  background-color: #003399;
+  font-size: 1.5rem;
+  font-weight: bold;
 }
 
 .menu-toggle {
-  display: none; /* Will be shown in media queries */
-  cursor: pointer;
-  font-size: 24px;
+  display: none;
   color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
 }
 
 #nav-links {
-  display: flex; /* Default to horizontal layout */
+  display: flex;
+  list-style: none;
+  gap: 2rem;
+  align-items: center;
 }
 
-#nav-links li {
-  margin: 0 15px;
+#nav-links li a {
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+#nav-links li a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .logout-btn {
-  background-color: red;
+  background-color: #e53e3e;
   color: white;
   border: none;
-  padding: 10px 15px;
-  cursor: pointer;
+  padding: 0.5rem 1rem;
   border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.dashboard-content {
-  padding: 20px;
+.logout-btn:hover {
+  background-color: #c53030;
+}
+
+/* Details Container */
+.details-container {
   max-width: 1200px;
-  margin: auto;
-}
-
-.create-league-section {
-  text-align: center;
-  border: 1px solid #ccc;
-  padding: 20px;
-  background-color: white;
-  border-radius: 5px;
-  margin-bottom: 30px;
-}
-
-.create-league-section .btn {
-  background-color: #28a745;
-  color: white;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.create-league-section .btn:hover {
-  background-color: #218838;
-}
-
-.modal {
-  display: none; /* Hide by default */
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgb(0,0,0);
-  background-color: rgba(0,0,0,0.4);
-}
-
-.modal-content {
-  background-color: #fefefe;
-  margin: 15% auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%;
-  max-width: 500px;
-  border-radius: 5px;
-}
-
-.close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.close:hover,
-.close:focus {
-  color: black;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.section-grid {
+  margin: 2rem auto;
+  padding: 0 1rem;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
 }
 
-.recent-activities, .quick-actions, .upcoming-matches {
+.details-section {
   background: white;
-  padding: 15px;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
 }
 
+.details-section:hover {
+  transform: translateY(-5px);
+}
+
+.details-section h2 {
+  color: #2c5282;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.details-section p {
+  margin-bottom: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.details-section p:last-child {
+  border-bottom: none;
+}
+
+.details-section strong {
+  color: #2d3748;
+  min-width: 120px;
+  display: inline-block;
+}
+
+/* League Details Specific Styles */
+.league-details {
+  background: linear-gradient(to bottom right, #ffffff, #f8fafc);
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
   .menu-toggle {
       display: block;
   }
 
   #nav-links {
-      display: none; /* Hide links by default */
-      flex-direction: column;
+      display: none;
       position: absolute;
-      top: 60px;
+      top: 100%;
       left: 0;
       right: 0;
-      background: #0044cc;
+      flex-direction: column;
+      background: #2c5282;
+      padding: 1rem;
+      gap: 1rem;
   }
 
   #nav-links.active {
-      display: flex; /* Show when active */
+      display: flex;
   }
 
-  .section-grid {
-      grid-template-columns: 1fr; /* Stack sections on mobile */
+  #nav-links li {
+      width: 100%;
   }
+
+  #nav-links li a {
+      display: block;
+      padding: 0.8rem;
+      text-align: center;
+  }
+
+  .details-container {
+      grid-template-columns: 1fr;
+  }
+}
+
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+      opacity: 0;
+      transform: translateY(20px);
+  }
+  to {
+      opacity: 1;
+      transform: translateY(0);
+  }
+}
+
+.details-section {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Status Indicators */
+.status {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 15px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status.approved {
+  background-color: #c6f6d5;
+  color: #2f855a;
+}
+
+.status.pending {
+  background-color: #fefcbf;
+  color: #975a16;
+}
+
+/* Error and Success Messages */
+.message {
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.error-message {
+  background-color: #fed7d7;
+  color: #c53030;
+  border: 1px solid #feb2b2;
+}
+
+.success-message {
+  background-color: #c6f6d5;
+  color: #2f855a;
+  border: 1px solid #9ae6b4;
 }
