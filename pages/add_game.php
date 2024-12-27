@@ -29,8 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $score_away = $_POST['score_away'];
 
         // Insert query to add a game
-        $stmt = $conn->prepare("INSERT INTO game (league_id, home_club_id, away_club_id, date, time, score_home, score_away) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("iiissss", $league_id, $home_club_id, $away_club_id, $date, $time, $score_home, $score_away);
+        $stmt = $conn->prepare("INSERT INTO game (league_id, home_club_id, away_club_id, date, time, score_home, score_away, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("iiisssss", $league_id, $home_club_id, $away_club_id, $date, $time, $score_home, $score_away, $name);
         $stmt->execute();
     }
 
@@ -74,7 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 // Query to fetch existing games
 $games = [];
-$stmt = $conn->prepare("SELECT * FROM game");
+$stmt = $conn->prepare("SELECT * FROM game WHERE created_by = ?");
+$stmt->bind_param("s", $name);
 $stmt->execute();
 $result = $stmt->get_result();
 while ($row = $result->fetch_assoc()) {
