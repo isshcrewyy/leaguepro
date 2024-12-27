@@ -1,6 +1,9 @@
 <?php
 // Start the session
 session_start();
+$name = $_SESSION['name'];
+
+
 
 // Ensure that the user is logged in
 if (!isset($_SESSION['userId'])) {
@@ -15,12 +18,15 @@ require 'db_connection.php';
 // Check if the form is submitted to add a new club
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_club'])) {
     $clubName = $_POST['c_name'];
-    $leagueId = $_POST['league_id'];
+    $leagueId = $_POST['league_id']; // session set
     $location = $_POST['location'];
+    
+
+    $_SESSION['league_id'] = $leagueId;
 
     // Insert the new club into the database
-    $stmt = $conn->prepare("INSERT INTO club (c_name, league_id, location) VALUES (?, ?, ?)");
-    $stmt->bind_param("sis", $clubName, $leagueId, $location);
+    $stmt = $conn->prepare("INSERT INTO club (c_name, league_id, location, created_by) VALUES (?, ?, ?,?)");
+    $stmt->bind_param("siss", $clubName, $leagueId, $location, $name);
     $stmt->execute();
     $stmt->close();
 
@@ -63,7 +69,8 @@ if (isset($_POST['update_club'])) {
 }
 
 // Fetch clubs from the database
-$club_stmt = $conn->prepare("SELECT club_id, c_name, league_id, location FROM club");
+
+$club_stmt = $conn->prepare("SELECT club_id, c_name, league_id, location FROM club where created_by = '$name'");
 $club_stmt->execute();
 $club_result = $club_stmt->get_result();
 ?>
@@ -106,7 +113,7 @@ $club_result = $club_stmt->get_result();
         <input type="text" name="c_name" id="c_name" required>
 
         <label for="league_id">League ID:</label>
-        <input type="number" name="league_id" id="league_id" required>
+        <input type="number"  name="league_id" id="league_id" required>
 
         <label for="location">Location:</label>
         <input type="text" name="location" id="location" required>
