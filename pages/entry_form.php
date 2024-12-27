@@ -1,3 +1,4 @@
+
 <?php
 // Include database connection (if not already included)
 require_once('db_connection.php');
@@ -13,6 +14,7 @@ if (!isset($_SESSION['userId'])) {
 }
 
 $userId = $_SESSION['userId'];  // Get the logged-in user's ID
+
 
 if (isset($_POST['submit_form'])) {
     // Gather form inputs and sanitize them

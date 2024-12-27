@@ -1,54 +1,25 @@
 <?php
-// Start session at the beginning
-session_start();
-
 // Database connection
 include 'db_connection.php';
+session_start();
 
-// Check if user is logged in and has necessary session variables
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['league_id'])) {
+if (!isset($_SESSION['name'])) {
     header("Location: login.php");
     exit();
 }
 
-$user_id = $_SESSION['user_id'];
-$league_id = $_SESSION['league_id'];
+$name = $_SESSION['name'];
 
-// Verify user has permission to access this league
-$stmt = $conn->prepare("SELECT * FROM league_users WHERE user_id = ? AND league_id = ?");
-$stmt->bind_param("ii", $user_id, $league_id);
-$stmt->execute();
-$result = $stmt->get_result();
+// SQL query to fetch players and coaches with prepared statements
+$stmt_players = $conn->prepare("SELECT player_id, p_name, age, position, club_id, phone_number FROM player WHERE created_by = ?");
+$stmt_players->bind_param("s", $name);
+$stmt_players->execute();
+$players_result = $stmt_players->get_result();
 
-if ($result->num_rows === 0) {
-    die("You don't have permission to access this league.");
-}
-
-// SQL queries with prepared statements for players and coaches
-$sql_players = $conn->prepare("SELECT player_id, name, age, position, club_id, phone_number 
-                              FROM player 
-                              WHERE league_id = ? AND EXISTS (
-                                  SELECT 1 FROM league_users 
-                                  WHERE league_users.league_id = player.league_id 
-                                  AND league_users.user_id = ?
-                              )");
-
-$sql_coaches = $conn->prepare("SELECT coach_id, name, age, experience, club_id, phone_number 
-                             FROM coach 
-                             WHERE league_id = ? AND EXISTS (
-                                 SELECT 1 FROM league_users 
-                                 WHERE league_users.league_id = coach.league_id 
-                                 AND league_users.user_id = ?
-                             )");
-
-// Execute queries with user verification
-$sql_players->bind_param("ii", $league_id, $user_id);
-$sql_players->execute();
-$players_result = $sql_players->get_result();
-
-$sql_coaches->bind_param("ii", $league_id, $user_id);
-$sql_coaches->execute();
-$coaches_result = $sql_coaches->get_result();
+$stmt_coaches = $conn->prepare("SELECT coach_id, co_name, age, experience, club_id, phone_number FROM coach WHERE created_by = ?");
+$stmt_coaches->bind_param("s", $name);
+$stmt_coaches->execute();
+$coaches_result = $stmt_coaches->get_result();
 
 // Create arrays to store data
 $players = [];
@@ -62,101 +33,84 @@ while ($row = $coaches_result->fetch_assoc()) {
     $coaches[] = $row;
 }
 
-// Handle player removal
-if (isset($_POST['action']) && $_POST['action'] == 'remove' && isset($_POST['type'])) {
-    if ($_POST['type'] == 'player') {
-        $player_id = $_POST['id'];
-        
-        // Verify user has permission to remove this player
-        $stmt = $conn->prepare("DELETE FROM player 
-                              WHERE player_id = ? 
-                              AND league_id = ? 
-                              AND EXISTS (
-                                  SELECT 1 FROM league_users 
-                                  WHERE league_users.league_id = player.league_id 
-                                  AND league_users.user_id = ?
-                              )");
-        $stmt->bind_param("iii", $player_id, $league_id, $user_id);
-        $stmt->execute();
-        
-        if ($stmt->affected_rows > 0) {
-            echo "<script>alert('Player removed successfully!'); window.location.href = 'team.php';</script>";
-        } else {
-            echo "<script>alert('Error: Unable to remove player or permission denied.'); window.history.back();</script>";
-        }
-    } elseif ($_POST['type'] == 'coach') {
-        $coach_id = $_POST['id'];
-        
-        // Verify user has permission to remove this coach
-        $stmt = $conn->prepare("DELETE FROM coach 
-                              WHERE coach_id = ? 
-                              AND league_id = ? 
-                              AND EXISTS (
-                                  SELECT 1 FROM league_users 
-                                  WHERE league_users.league_id = coach.league_id 
-                                  AND league_users.user_id = ?
-                              )");
-        $stmt->bind_param("iii", $coach_id, $league_id, $user_id);
-        $stmt->execute();
-        
-        if ($stmt->affected_rows > 0) {
-            echo "<script>alert('Coach removed successfully!'); window.location.href = 'team.php';</script>";
-        } else {
-            echo "<script>alert('Error: Unable to remove coach or permission denied.'); window.history.back();</script>";
-        }
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    // Validate that type is set
+    if (!isset($_POST['type'])) {
+        echo "<script>alert('Form type not specified!'); window.history.back();</script>";
+        exit();
     }
-}
 
-// Handle form submissions for adding players/coaches
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['type'])) {
     $type = $_POST['type'];
 
     if ($type === 'player') {
-        $name = $_POST['name'];
-        $age = $_POST['age'];
-        $position = $_POST['position'];
-        $club_id = $_POST['club_id'];
-        $phone_number = $_POST['phone_number'];
-
-        // Insert player with league_id
-        $stmt = $conn->prepare("INSERT INTO player (name, age, position, club_id, phone_number, league_id) 
-                              SELECT ?, ?, ?, ?, ?, ? 
-                              FROM league_users 
-                              WHERE user_id = ? AND league_id = ?");
-        $stmt->bind_param("sississi", $name, $age, $position, $club_id, $phone_number, $league_id, $user_id, $league_id);
-
-        if ($stmt->execute() && $stmt->affected_rows > 0) {
-            echo "<script>alert('Player added successfully!'); window.location.href = 'team.php';</script>";
-        } else {
-            echo "<script>alert('Error adding player: Permission denied'); window.history.back();</script>";
+        // Validate player form data
+        if (!isset($_POST['p_name']) || empty($_POST['p_name'])) {
+            echo "<script>alert('Player name is required!'); window.history.back();</script>";
+            exit();
         }
+
+        // Get and sanitize player data
+        $player_name = trim($_POST['p_name']);
+        $age = isset($_POST['age']) ? (int)$_POST['age'] : 0;
+        $position = isset($_POST['position']) ? trim($_POST['position']) : '';
+        $club_id = isset($_POST['club_id']) ? trim($_POST['club_id']) : '';
+        $phone_number = isset($_POST['phone_number']) ? trim($_POST['phone_number']) : '';
+
+        // Validate required fields
+        if (empty($player_name) || empty($position) || empty($club_id)) {
+            echo "<script>alert('All required fields must be filled!'); window.history.back();</script>";
+            exit();
+        }
+
+        try {
+            $stmt = $conn->prepare("INSERT INTO player (p_name, age, position, club_id, phone_number, created_by) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("sissss", $player_name, $age, $position, $club_id, $phone_number, $name);
+
+            if ($stmt->execute()) {
+                echo "<script>alert('Player added successfully!'); window.location.href = 'team.php';</script>";
+            } else {
+                throw new Exception("Error executing query");
+            }
+        } catch (Exception $e) {
+            echo "<script>alert('Error adding player: " . htmlspecialchars($e->getMessage()) . "'); window.history.back();</script>";
+        }
+
     } elseif ($type === 'coach') {
-        $name = $_POST['name'];
-        $experience = $_POST['experience'];
-        $age = $_POST['age'];
-        $club_id = $_POST['club_id'];
-        $phone_number = $_POST['phone_number'];
+        // Validate coach form data
+        if (!isset($_POST['co_name']) || empty($_POST['co_name'])) {
+            echo "<script>alert('Coach name is required!'); window.history.back();</script>";
+            exit();
+        }
 
-        // Insert coach with league_id
-        $stmt = $conn->prepare("INSERT INTO coach (name, experience, age, club_id, phone_number, league_id) 
-                              SELECT ?, ?, ?, ?, ?, ? 
-                              FROM league_users 
-                              WHERE user_id = ? AND league_id = ?");
-        $stmt->bind_param("siissiii", $name, $experience, $age, $club_id, $phone_number, $league_id, $user_id, $league_id);
+        // Get and sanitize coach data
+        $coach_name = trim($_POST['co_name']);
+        $experience = isset($_POST['experience']) ? (int)$_POST['experience'] : 0;
+        $age = isset($_POST['age']) ? (int)$_POST['age'] : 0;
+        $club_id = isset($_POST['club_id']) ? trim($_POST['club_id']) : '';
+        $phone_number = isset($_POST['phone_number']) ? trim($_POST['phone_number']) : '';
 
-        if ($stmt->execute() && $stmt->affected_rows > 0) {
-            echo "<script>alert('Coach added successfully!'); window.location.href = 'team.php';</script>";
-        } else {
-            echo "<script>alert('Error adding coach: Permission denied'); window.history.back();</script>";
+        // Validate required fields
+        if (empty($coach_name) || empty($club_id)) {
+            echo "<script>alert('All required fields must be filled!'); window.history.back();</script>";
+            exit();
+        }
+
+        try {
+            $stmt = $conn->prepare("INSERT INTO coach (co_name, experience, age, club_id, phone_number, created_by) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("siisss", $coach_name, $experience, $age, $club_id, $phone_number, $name);
+
+            if ($stmt->execute()) {
+                echo "<script>alert('Coach added successfully!'); window.location.href = 'team.php';</script>";
+            } else {
+                throw new Exception("Error executing query");
+            }
+        } catch (Exception $e) {
+            echo "<script>alert('Error adding coach: " . htmlspecialchars($e->getMessage()) . "'); window.history.back();</script>";
         }
     }
 }
 
-// Close all prepared statements
-if (isset($stmt)) $stmt->close();
-$sql_players->close();
-$sql_coaches->close();
-$conn->close();
+// Don't close the connection here as we need it for the HTML part
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -221,8 +175,8 @@ $conn->close();
         <tr id="player_<?php echo $player['player_id']; ?>">
             <td><?php echo $player['player_id']; ?></td>
             <td>
-                <span class="display-value"><?php echo htmlspecialchars($player['name']); ?></span>
-                <input type="text" class="edit-input" value="<?php echo htmlspecialchars($player['name']); ?>" style="display: none;">
+                <span class="display-value"><?php echo htmlspecialchars($player['p_name']); ?></span>
+                <input type="text" class="edit-input" value="<?php echo htmlspecialchars($player['p_name']); ?>" style="display: none;">
             </td>
             <td>
                 <span class="display-value"><?php echo $player['age']; ?></span>
@@ -275,8 +229,8 @@ $conn->close();
         <tr id="coach_<?php echo $coach['coach_id']; ?>">
             <td><?php echo $coach['coach_id']; ?></td>
             <td>
-                <span class="display-value"><?php echo htmlspecialchars($coach['name']); ?></span>
-                <input type="text" class="edit-input" value="<?php echo htmlspecialchars($coach['name']); ?>" style="display: none;">
+                <span class="display-value"><?php echo htmlspecialchars($coach['co_name']); ?></span>
+                <input type="text" class="edit-input" value="<?php echo htmlspecialchars($coach['co_name']); ?>" style="display: none;">
             </td>
             <td>
                 <span class="display-value"><?php echo $coach['age']; ?></span>
@@ -325,8 +279,8 @@ $conn->close();
         <!-- Add Player Form -->
         <form id="playerForm" method="POST" action="team.php" style="display: block;">
         <input type="hidden" name="type" value="player">
-        <label for="player_name">Player Name *</label>
-        <input type="text" id="player_name" name="name" placeholder="Enter Name" required />
+        <label for="p_name">Player Name *</label>
+        <input type="text" name="p_name" required>
 
         <label for="player_age">Age *</label>
         <input type="number" id="player_age" name="age" placeholder="Enter Age" required />
@@ -347,8 +301,8 @@ $conn->close();
         <!-- Add Coach Form -->
         <form id="coachForm" method="POST" action="team.php" style="display: none;">
         <input type="hidden" name="type" value="coach">
-        <label for="coach_name">Coach Name *</label>
-        <input type="text" id="coach_name" name="name" placeholder="Enter Name" required />
+        <label for="co_name">Coach Name *</label>
+        <input type="text" name="co_name" required>
 
         <label for="experience">Experience *</label>
         <input type="text" id="experience" name="experience" placeholder="Enter Experience" required />
