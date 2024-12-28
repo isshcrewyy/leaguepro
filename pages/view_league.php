@@ -64,6 +64,23 @@ if ($club_id > 0) {
     }
 }
 
+$coachs = [];
+if ($club_id > 0){
+    $clubQuery = "SELECT c_name, location FROM club WHERE club_id = $club_id";
+    $clubResult = $conn->query($clubQuery);
+    if ($clubResult && $clubResult->num_rows > 0) {
+        $club = $clubResult->fetch_assoc();
+
+        $coachsQuery = "SELECT co_name, age, experience FROM coach WHERE club_id = $club_id";
+        $coachsResult = $conn->query($coachsQuery);
+        if ($coachsResult && $coachsResult->num_rows > 0) {
+            while ($coach = $coachsResult->fetch_assoc()) {
+                $coachs[] = $coach;
+            }
+        }
+    }
+}
+
 // Fetch Leaderboard for the selected League
 $leaderboardQuery = "SELECT club_id, points, wins, losses, draws, goal_difference FROM leaderboard WHERE league_id = $league_id ORDER BY points DESC";
 $leaderboardResult = $conn->query($leaderboardQuery);
@@ -160,7 +177,6 @@ $conn->close();
                                         <h3><?php echo htmlspecialchars($player['p_name']); ?></h3>
                                         <p>Age: <?php echo htmlspecialchars($player['age']); ?></p>
                                         <p>Position: <?php echo htmlspecialchars($player['position']); ?></p>
-                                        <p>Phone: <?php echo htmlspecialchars($player['phone_number']); ?></p>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
@@ -168,6 +184,26 @@ $conn->close();
                     <?php elseif ($club_id > 0): ?>
                         <section>
                             <h2>No players found for this club</h2>
+                        </section>
+                    <?php endif; ?>
+
+                     <!-- coach Section -->
+                     <?php if ($club_id > 0 && !empty($coachs)): ?>
+                        <section>
+                            <h2>Coach</h2>
+                            <div class="card-container">
+                                <?php foreach ($coachs as $coach): ?>
+                                    <div class="card">
+                                        <h3><?php echo htmlspecialchars($coach['co_name']); ?></h3>
+                                        <p>Age: <?php echo htmlspecialchars($coach['age']); ?></p>
+                                        <p>Experience <?php echo htmlspecialchars($coach['experience']); ?></p>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </section>
+                    <?php elseif ($club_id > 0): ?>
+                        <section>
+                            <h2>No coach found for this club</h2>
                         </section>
                     <?php endif; ?>
 

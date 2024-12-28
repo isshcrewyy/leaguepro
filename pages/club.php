@@ -90,7 +90,7 @@ $club_result = $club_stmt->get_result();
 
     <nav class="navbar">
     <a href="org_dashboard.php" class="logo">Organizer</a>
-   
+    <span class="menu-toggle" onclick="toggleMenu()">☰</span>
     <ul id="nav-links">
         <li><a href="club.php">Your Clubs</a></li>
         <li><a href="team.php">Your Team</a></li>

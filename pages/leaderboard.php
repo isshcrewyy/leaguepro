@@ -162,7 +162,7 @@ foreach ($leaderboard as $club_id => $data) {
 
 <nav class="navbar">
     <a href="org_dashboard.php" class="logo">Organizer</a>
-    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <span class="menu-toggle" onclick="toggleMenu()">☰</span>
     <ul id="nav-links">
         <li><a href="club.php">Your Clubs</a></li>
         <li><a href="team.php">Your Team</a></li>
