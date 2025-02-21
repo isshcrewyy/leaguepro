@@ -9,10 +9,15 @@ if (isset($_POST['register'])) {
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
+    // Password validation pattern
+    $password_pattern = "/^(?=.*[A-Za-z])(?=.*\d{6,})(?=.*[\W_]).{8,}$/";
+
     if (empty($name) || empty($email) || empty($password)) {
         echo "<script>alert('All fields are required.');</script>";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         echo "<script>alert('Invalid email format.');</script>";
+    } elseif (!preg_match($password_pattern, $password)) {
+        echo "<script>alert('Password must be at least 8 characters long, include at least 6 digits, one letter, and one special character.');</script>";
     } elseif ($password !== $confirm_password) {
         echo "<script>alert('Passwords do not match!');</script>";
     } else {
@@ -29,9 +34,8 @@ if (isset($_POST['register'])) {
             $stmt->bind_param("sss", $name, $email, $hashed_password);
             if ($stmt->execute()) {
                 $_SESSION['userId'] = $conn->insert_id; // Save the userId for use in the next step
-                
                 $_SESSION['name'] = $name;
-                
+
                 header('Location: entry_form.php');
                 exit();
             } else {
@@ -41,6 +45,8 @@ if (isset($_POST['register'])) {
         $stmt->close();
     }
 }
+
+
 ?>
 
 <!DOCTYPE html>

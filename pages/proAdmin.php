@@ -128,7 +128,7 @@ if (isset($_SESSION['admin_id'])) {
         }
     }
 } else {
-    echo "Login in to manage User and Forms.";
+    echo ".";
 }
 ?>
 
@@ -143,7 +143,7 @@ if (isset($_SESSION['admin_id'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <div class="container">
+    <div class="registration-container">
         <h2>Admin Portal</h2>
 
         <?php if (!isset($_SESSION['admin_id'])): ?>
@@ -166,7 +166,8 @@ if (isset($_SESSION['admin_id'])) {
             </form>
 
             <hr>
-
+            <h3>Already Registered?</h3>
+            <h4>/</h4>
             <!-- Login Form -->
             <h3>Login</h3>
             <form method="POST" action="">
@@ -179,9 +180,14 @@ if (isset($_SESSION['admin_id'])) {
                 <button type="submit" name="login">Login</button>
             </form>
         <?php else: ?>
+    </div>
+        <div class="conatiner">
             <!-- Admin Dashboard -->
             <h3>Welcome, <?php echo $_SESSION['admin_name']; ?>!</h3>
             <p>You are logged in as an Admin.</p>
+            <form action="logout.php" method="post" style="display:inline;">
+                    <button type="submit" class="logout-btn">Logout</button>
+                </form>
  
 
             <h4>Manage Users (Organizers)</h4>
@@ -375,6 +381,8 @@ if (isset($_SESSION['admin_id'])) {
                 <?php endif; ?>
             </div>
         <?php endif; ?>
-    </div>
+    
+    
+        </div>
 </body>
 </html>
