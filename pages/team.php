@@ -33,6 +33,34 @@ while ($row = $coaches_result->fetch_assoc()) {
     $coaches[] = $row;
 }
 
+  // Handle Remove Request
+  if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action']) && $_POST['action'] === 'remove') {
+    if (!isset($_POST['type']) || !isset($_POST['id'])) {
+        echo "<script>alert('Invalid request!'); window.history.back();</script>";
+        exit();
+    }
+
+    $type = $_POST['type'];
+    $id = intval($_POST['id']); 
+
+    if ($type === 'player') {
+        $stmt = $conn->prepare("DELETE FROM player WHERE player_id = ?");
+    } elseif ($type === 'coach') {
+        $stmt = $conn->prepare("DELETE FROM coach WHERE coach_id = ?");
+    } else {
+        echo "<script>alert('Invalid type!'); window.history.back();</script>";
+        exit();
+    }
+
+    $stmt->bind_param("i", $id);
+    
+    if ($stmt->execute()) {
+        echo "<script>alert('Record removed successfully!'); window.location.href = 'team.php';</script>";
+    } else {
+        echo "<script>alert('Error removing record.'); window.history.back();</script>";
+    }
+}
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Validate that type is set
     if (!isset($_POST['type'])) {
@@ -108,6 +136,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             echo "<script>alert('Error adding coach: " . htmlspecialchars($e->getMessage()) . "'); window.history.back();</script>";
         }
     }
+  
+
 }
 
 // Don't close the connection here as we need it for the HTML part
@@ -198,11 +228,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <button class="edit-btn" onclick="toggleEdit(this, 'player', <?php echo $player['player_id']; ?>)">Edit</button>
                 <button class="save-btn" onclick="saveChanges(this, 'player', <?php echo $player['player_id']; ?>)" style="display: none;">Save</button>
                 <button class="cancel-btn" onclick="cancelEdit(this, 'player', <?php echo $player['player_id']; ?>)" style="display: none;">Cancel</button>
-                <form method="POST" action="team.php" onsubmit="return confirm('Are you sure you want to remove this record?');" style="display:inline;">
-                    <input type="hidden" name="action" value="remove">
-                    <input type="hidden" name="id" value="<?php echo $player['player_id']; ?>">
-                    <input type="submit" value="Remove">
-                </form>
+                <form method="POST" action="team.php" onsubmit="return confirm('Are you sure you want to remove this player?');">
+    <input type="hidden" name="action" value="remove">
+    <input type="hidden" name="type" value="player">
+    <input type="hidden" name="id" value="<?php echo $player['player_id']; ?>">
+    <input type="submit" class="remove-button" value="Remove">
+</form>
+
+
             </td>
         </tr>
     <?php endforeach; ?>
