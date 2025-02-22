@@ -74,7 +74,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 // Query to fetch existing games
 $games = [];
-$stmt = $conn->prepare("SELECT * FROM game WHERE created_by = ?");
+$sql = "SELECT match_id, 
+                l.league_name, 
+                ch.c_name AS HomeClub, 
+                ca.c_name AS AwayClub, 
+                g.date, 
+                g.time, 
+                g.score_home, 
+                g.score_away, 
+                g.created_by 
+            FROM game g 
+            INNER JOIN league l ON l.league_id = g.league_id
+            INNER JOIN club ch ON ch.club_id = g.home_club_id
+            INNER JOIN club ca ON ca.club_id = g.away_club_id
+             WHERE g.created_by = ?;";
+$stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $name);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -140,7 +154,17 @@ $result = $stmt->get_result();
         <form method="POST" action="add_game.php">
             <input type="hidden" name="action" value="add">
             <label for="league_id">League ID:</label>
-            <input type="number" name="league_id" required>
+            <select name="league_id" id="league_id" required>
+                <option value="">Select a League</option>
+                <?php
+                $league_stmt = $conn->prepare("SELECT league_id, league_name FROM league WHERE userid = '".$_SESSION['userId']."'");
+                $league_stmt->execute();
+                $league_result = $league_stmt->get_result();
+                while ($league = $league_result->fetch_assoc()) {
+                    echo "<option value='" . $league['league_id'] . "'>" . $league['league_name'] . "</option>";
+                }
+                ?>
+                </select>
 
          
             <!-- Dropdown for Home Club -->
@@ -210,16 +234,16 @@ $result = $stmt->get_result();
         <tr id="game_<?php echo $game['match_id']; ?>">
             <td><?php echo htmlspecialchars($game['match_id']); ?></td>
             <td>
-                <span class="display-value"><?php echo htmlspecialchars($game['league_id']); ?></span>
-                <input type="number" class="edit-input" value="<?php echo htmlspecialchars($game['league_id']); ?>" style="display: none;">
+                <span class="display-value"><?php echo htmlspecialchars($game['league_name']); ?></span>
+                <input type="number" class="edit-input" value="<?php echo htmlspecialchars($game['league_name']); ?>" style="display: none;">
             </td>
             <td>
-                <span class="display-value"><?php echo htmlspecialchars($game['home_club_id']); ?></span>
-                <input type="number" class="edit-input" value="<?php echo htmlspecialchars($game['home_club_id']); ?>" style="display: none;">
+                <span class="display-value"><?php echo htmlspecialchars($game['HomeClub']); ?></span>
+                <input type="number" class="edit-input" value="<?php echo htmlspecialchars($game['HomeClub']); ?>" style="display: none;">
             </td>
             <td>
-                <span class="display-value"><?php echo htmlspecialchars($game['away_club_id']); ?></span>
-                <input type="number" class="edit-input" value="<?php echo htmlspecialchars($game['away_club_id']); ?>" style="display: none;">
+                <span class="display-value"><?php echo htmlspecialchars($game['AwayClub']); ?></span>
+                <input type="number" class="edit-input" value="<?php echo htmlspecialchars($game['AwayClub']); ?>" style="display: none;">
             </td>
             <td>
                 <span class="display-value"><?php echo htmlspecialchars($game['date']); ?></span>

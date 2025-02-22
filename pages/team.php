@@ -322,7 +322,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <input type="text" id="position" name="position" placeholder="Forward, Wing, etc." required />
 
         <label for="club_id">Club ID *</label>
-        <input type="number" id="club_id" name="club_id" placeholder="Enter Club ID" required />
+        <select name="club_id" id="club_id" required>
+            <option value="">Select Club</option>
+            <?php
+            $stmt = $conn->prepare("SELECT club_id, c_name FROM club WHERE created_by = ?");
+            $stmt->bind_param("s", $name);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            while ($row = $result->fetch_assoc()) {
+                echo "<option value='" . $row['club_id'] . "'>" . htmlspecialchars($row['c_name']) . "</option>";
+            }
+            ?>
+        </select>
 
         <label for="phone_number">Phone Number *</label>
         <input type="text" id="phone_number" name="phone_number" placeholder="Enter Phone Number" required />
@@ -344,7 +356,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <input type="number" id="coach_age" name="age" placeholder="Enter Age" required />
 
         <label for="club_id_coach">Club ID *</label>
-        <input type="number" id="club_id_coach" name="club_id" placeholder="Enter Club ID" required />
+        <select name="club_id" id="club_id_coach" required>
+            <option value="">Select Club</option>
+            <?php
+            $stmt = $conn->prepare("SELECT club_id, c_name FROM club WHERE created_by = ?");
+            $stmt->bind_param("s", $name);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            while ($row = $result->fetch_assoc()) {
+                echo "<option value='" . $row['club_id'] . "'>" . htmlspecialchars($row['c_name']) . "</option>";
+            }
+            ?>
+        </select>
+       
 
         <label for="phone_number_coach">Phone Number *</label>
         <input type="text" id="phone_number_coach" name="phone_number" placeholder="Enter Phone Number" required />

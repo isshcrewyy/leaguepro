@@ -70,8 +70,8 @@ if (isset($_POST['update_club'])) {
 }
 
 // Fetch clubs from the database
-
-$club_stmt = $conn->prepare("SELECT club_id, c_name, league_id, location FROM club where created_by = '$name'");
+$sql = "SELECT c.club_id, c.c_name, c.league_id, c.location, l.league_name FROM club c JOIN league l ON c.league_id = l.league_id WHERE c.created_by = '$name'";
+$club_stmt = $conn->prepare($sql);
 $club_stmt->execute();
 $club_result = $club_stmt->get_result();
 ?>
@@ -114,8 +114,17 @@ $club_result = $club_stmt->get_result();
         <input type="text" name="c_name" id="c_name" required>
 
         <label for="league_id">League ID:</label>
-        <input type="number"  name="league_id" id="league_id" required>
-
+        <select name="league_id" id="league_id" required>
+            <option value="">Select a League</option>
+            <?php
+            $league_stmt = $conn->prepare("SELECT league_id, league_name FROM league WHERE userid = '".$_SESSION['userId']."'");
+            $league_stmt->execute();
+            $league_result = $league_stmt->get_result();
+            while ($league = $league_result->fetch_assoc()) {
+                echo "<option value='" . $league['league_id'] . "'>" . $league['league_name'] . "</option>";
+            }
+            ?>
+        </select>
         <label for="location">Location:</label>
         <input type="text" name="location" id="location" required>
 
@@ -129,7 +138,7 @@ $club_result = $club_stmt->get_result();
             <tr>
                 <th>Club ID</th>
                 <th>Club Name</th>
-                <th>League ID</th>
+                <th>League Name</th>
                 <th>Location</th>
                 <th>Actions</th>
             </tr>
@@ -143,8 +152,8 @@ $club_result = $club_stmt->get_result();
             <input type="text" class="edit-input" value="<?php echo htmlspecialchars($club['c_name']); ?>" style="display: none;">
         </td>
         <td>
-            <span class="display-value"><?php echo htmlspecialchars($club['league_id']); ?></span>
-            <input type="number" class="edit-input" value="<?php echo htmlspecialchars($club['league_id']); ?>" style="display: none;">
+            <span class="display-value"><?php echo htmlspecialchars($club['league_name']); ?></span>
+            <input type="number" class="edit-input" value="<?php echo htmlspecialchars($club['league_name']); ?>" style="display: none;">
         </td>
         <td>
             <span class="display-value"><?php echo htmlspecialchars($club['location']); ?></span>
