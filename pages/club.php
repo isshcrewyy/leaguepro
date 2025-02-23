@@ -3,7 +3,7 @@
 // Start the session
 session_start();
 $name = $_SESSION['name'];
-
+$userId = $_SESSION['userId'];
 
 
 // Ensure that the user is logged in
@@ -21,19 +21,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_club'])) {
     $clubName = $_POST['c_name'];
     $leagueId = $_POST['league_id']; // session set
     $location = $_POST['location'];
+    $userId = $_SESSION['userId'];
     
 
     $_SESSION['league_id'] = $leagueId;
 
-    // Insert the new club into the database
-    $stmt = $conn->prepare("INSERT INTO club (c_name, league_id, location, created_by) VALUES (?, ?, ?,?)");
-    $stmt->bind_param("siss", $clubName, $leagueId, $location, $name);
+    $sql = "SELECT COUNT(*) AS club_count FROM club WHERE created_by = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $userId);
     $stmt->execute();
-    $stmt->close();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $club_count = $row['club_count']; // Get the count
+    
+
+    if ($club_count >= 9) {
+       echo "<script>alert('You can only add up to 9 clubs!');</script>";
+    } else {
+        // Insert the new club into the database
+        $stmt = $conn->prepare("INSERT INTO club (c_name, league_id, location, created_by) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("sisi", $clubName, $leagueId, $location, $userId);
+        $stmt->execute();
+        $stmt->close();
+
 
     // Redirect to the same page to prevent form resubmission
     header("Location: club.php");
     exit();
+    }
 }
 
 // Check if a club should be deleted
@@ -70,7 +85,7 @@ if (isset($_POST['update_club'])) {
 }
 
 // Fetch clubs from the database
-$sql = "SELECT c.club_id, c.c_name, c.league_id, c.location, l.league_name FROM club c JOIN league l ON c.league_id = l.league_id WHERE c.created_by = '$name'";
+$sql = "SELECT c.club_id, c.c_name, c.league_id, c.location, l.league_name FROM club c JOIN league l ON c.league_id = l.league_id WHERE c.created_by = $userId";
 $club_stmt = $conn->prepare($sql);
 $club_stmt->execute();
 $club_result = $club_stmt->get_result();
@@ -169,6 +184,8 @@ $club_result = $club_stmt->get_result();
     <?php endwhile; ?>
 </tbody>
     </table>
+
+
 
 
    

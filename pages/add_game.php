@@ -110,7 +110,7 @@ if (isset($_GET['edit'])) {
 // Query to get unique player names from the database (corrected)
 $query = "SELECT DISTINCT club_id, c_name FROM club WHERE created_by = ?";
 $stmt = $conn->prepare($query);
-$stmt->bind_param("s", $name);
+$stmt->bind_param("i", $userId);
 $stmt->execute();
 $result = $stmt->get_result();
 ?>

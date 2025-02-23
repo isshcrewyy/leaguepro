@@ -258,15 +258,12 @@ if (isset($_SESSION['admin_id'])) {
                                     <td><?php echo htmlspecialchars($user['name']); ?></td>
                                     <td><?php echo htmlspecialchars($user['email']); ?></td>
                                     <td>
-                                        <a href="?action=deny&id=<?php echo $user['userId']; ?>" 
+                                    <a href="?edit=<?php echo $user['userId']; ?>">Edit</a>  | <a href="?action=deny&id=<?php echo $user['userId']; ?>" 
                                            onclick="return confirm('Are you sure you want to deny this user? This action cannot be undone.');">
-                                           Deny
-                                        </a> |
-                                        <a href="?edit=<?php echo $user['userId']; ?>">Edit</a> |
-                                        <a href="?action=delete&id=<?php echo $user['userId']; ?>" 
-                                           onclick="return confirm('Are you sure you want to delete this user?');">
-                                           Delete
-                                        </a>
+                                          Delete
+                                        </a> 
+                                        
+                                       
                                     </td>
                                 </tr>
                             <?php endwhile; ?>

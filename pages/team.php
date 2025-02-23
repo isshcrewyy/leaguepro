@@ -9,6 +9,7 @@ if (!isset($_SESSION['name'])) {
 }
 
 $name = $_SESSION['name'];
+$userId = $_SESSION['userId'];
 
 // SQL query to fetch players and coaches with prepared statements
 $stmt_players = $conn->prepare("SELECT player_id, p_name, age, position, club_id, phone_number FROM player WHERE created_by = ?");
@@ -326,7 +327,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <option value="">Select Club</option>
             <?php
             $stmt = $conn->prepare("SELECT club_id, c_name FROM club WHERE created_by = ?");
-            $stmt->bind_param("s", $name);
+            $stmt->bind_param("i", $userId);
             $stmt->execute();
             $result = $stmt->get_result();
 
@@ -360,7 +361,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <option value="">Select Club</option>
             <?php
             $stmt = $conn->prepare("SELECT club_id, c_name FROM club WHERE created_by = ?");
-            $stmt->bind_param("s", $name);
+            $stmt->bind_param("i", $userId);
             $stmt->execute();
             $result = $stmt->get_result();
 

@@ -90,8 +90,7 @@ $league = $league_result->fetch_assoc();
             <?php if ($league): ?>
             <p><strong>League ID:</strong> <?php echo htmlspecialchars($league['league_id']); ?></p>
             <p><strong>League Name:</strong> <?php echo htmlspecialchars($league['league_name']); ?></p>
-            <p><strong>Season:</strong> <?php echo htmlspecialchars($league['season']); ?></p>
-            <p><strong>Duration:</strong> <?php echo htmlspecialchars($league['duration']); ?></p>
+            <p><strong>Duration:</strong> <?php echo htmlspecialchars($league['duration']); ?> month</p>
             <p><strong>Location:</strong> <?php echo htmlspecialchars($league['location']); ?></p>
             <?php else: ?>
             <p>No league details available.</p>
