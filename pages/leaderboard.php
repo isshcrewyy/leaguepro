@@ -2,6 +2,7 @@
 // Start the session
 session_start();
 $name = $_SESSION['name'];
+$userId = $_SESSION['userId'];
 
 // Ensure that the user is logged in
 if (!isset($_SESSION['userId'])) {
@@ -20,7 +21,7 @@ require 'db_connection.php';
 // Fetch all games from the database for the selected league
 $query = "SELECT * FROM game WHERE created_by = ? ";
 $stmt = $conn->prepare($query);
-$stmt->bind_param("s", $name);
+$stmt->bind_param("s", $userId);
 $stmt->execute();
 $result = $stmt->get_result();
 

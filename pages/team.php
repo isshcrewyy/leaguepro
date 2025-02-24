@@ -288,6 +288,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <button class="cancel-btn" onclick="cancelEdit(this, 'coach', <?php echo $coach['coach_id']; ?>)" style="display: none;">Cancel</button>
                 <form method="POST" action="team.php" onsubmit="return confirm('Are you sure you want to remove this record?');" style="display:inline;">
                     <input type="hidden" name="action" value="remove">
+                    <input type="hidden" name="type" value="coach"> 
                     <input type="hidden" name="id" value="<?php echo $coach['coach_id']; ?>">
                     <input type="submit" value="Remove">
                 </form>

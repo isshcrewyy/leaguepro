@@ -5,7 +5,6 @@ $name = $_SESSION['name'];
 
 // Ensure that the user is logged in
 if (!isset($_SESSION['userId'])) {
-    // If no session, redirect to login
     session_destroy();
     header("Location: login.php");
     exit();
@@ -16,6 +15,33 @@ require 'db_connection.php';
 
 // Get the userId from the session
 $userId = $_SESSION['userId'];
+
+
+  // Handle Remove Request
+  if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action']) && $_POST['action'] === 'remove') {
+    if (!isset($_POST['type']) || !isset($_POST['id'])) {
+        echo "<script>alert('Invalid request!'); window.history.back();</script>";
+        exit();
+    }
+
+    $type = $_POST['type'];
+    $id = intval($_POST['id']); 
+
+    if ($type === 'game') {
+        $stmt = $conn->prepare("DELETE FROM game WHERE match_id = ?");
+    } else {
+        echo "<script>alert('Invalid type!'); window.history.back();</script>";
+        exit();
+    }
+
+    $stmt->bind_param("i", $id);
+    
+    if ($stmt->execute()) {
+        echo "<script>alert('Record removed successfully!'); window.location.href = 'add_game.php';</script>";
+    } else {
+        echo "<script>alert('Error removing record.'); window.history.back();</script>";
+    }
+}
 
 // Handling form submission for adding a game
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -30,8 +56,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // Insert query to add a game
         $stmt = $conn->prepare("INSERT INTO game (league_id, home_club_id, away_club_id, date, time, score_home, score_away, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("iiisssss", $league_id, $home_club_id, $away_club_id, $date, $time, $score_home, $score_away, $name);
+        $stmt->bind_param("iiissssi", $league_id, $home_club_id, $away_club_id, $date, $time, $score_home, $score_away, $userId);
         $stmt->execute();
+
+        header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
     }
 
     // Handling form submission for removing a game
@@ -44,32 +73,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->execute();
     }
 
-    // Handling form submission for updating a game
-    if (isset($_POST['action']) && $_POST['action'] == 'update') {
-        $match_id = $_POST['match_id'];
-        $league_id = $_POST['league_id'];
-        $home_club_id = $_POST['home_club_id'];
-        $away_club_id = $_POST['away_club_id'];
-        $date = $_POST['date'];
-        $time = $_POST['time'];
-        $score_home = $_POST['score_home'];
-        $score_away = $_POST['score_away'];
-
-        $stmt = $conn->prepare("UPDATE game SET league_id = ?, home_club_id = ?, away_club_id = ?, date = ?, time = ?, score_home = ?, score_away = ? WHERE match_id = ?");
-        $stmt->bind_param("iiissssi", $league_id, $home_club_id, $away_club_id, $date, $time, $score_home, $score_away, $match_id);
-
-        if ($stmt->execute()) {
-            if (isset($_POST['ajax'])) {
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        if (isset($_POST['action']) && $_POST['action'] == 'update') {
+            $match_id = $_POST['match_id'];
+            $score_home = $_POST['score_home'];
+            $score_away = $_POST['score_away'];
+    
+            $stmt = $conn->prepare("UPDATE game SET score_home = ?, score_away = ? WHERE match_id = ?");
+            $stmt->bind_param("iii", $score_home, $score_away, $match_id);
+    
+            if ($stmt->execute()) {
                 echo json_encode(['success' => true]);
-                exit;
-            }
-        } else {
-            if (isset($_POST['ajax'])) {
+            } else {
                 echo json_encode(['success' => false, 'error' => $stmt->error]);
-                exit;
             }
+            exit;
         }
     }
+    
+    
 }
 
 // Query to fetch existing games
@@ -89,7 +111,7 @@ $sql = "SELECT match_id,
             INNER JOIN club ca ON ca.club_id = g.away_club_id
              WHERE g.created_by = ?;";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $name);
+$stmt->bind_param("s", $userId);
 $stmt->execute();
 $result = $stmt->get_result();
 while ($row = $result->fetch_assoc()) {
@@ -219,9 +241,9 @@ $result = $stmt->get_result();
         <thead>
             <tr>
                 <th>Match ID</th>
-                <th>League ID</th>
-                <th>Home Club ID</th>
-                <th>Away Club ID</th>
+                <th>League</th>
+                <th>Home Club </th>
+                <th>Away Club </th>
                 <th>Date</th>
                 <th>Time</th>
                 <th>Home Score</th>
@@ -230,49 +252,41 @@ $result = $stmt->get_result();
             </tr>
         </thead>
         <tbody>
-    <?php foreach ($games as $game) : ?>
-        <tr id="game_<?php echo $game['match_id']; ?>">
-            <td><?php echo htmlspecialchars($game['match_id']); ?></td>
-            <td>
-                <span class="display-value"><?php echo htmlspecialchars($game['league_name']); ?></span>
-                <input type="number" class="edit-input" value="<?php echo htmlspecialchars($game['league_name']); ?>" style="display: none;">
-            </td>
-            <td>
-                <span class="display-value"><?php echo htmlspecialchars($game['HomeClub']); ?></span>
-                <input type="number" class="edit-input" value="<?php echo htmlspecialchars($game['HomeClub']); ?>" style="display: none;">
-            </td>
-            <td>
-                <span class="display-value"><?php echo htmlspecialchars($game['AwayClub']); ?></span>
-                <input type="number" class="edit-input" value="<?php echo htmlspecialchars($game['AwayClub']); ?>" style="display: none;">
-            </td>
-            <td>
-                <span class="display-value"><?php echo htmlspecialchars($game['date']); ?></span>
-                <input type="date" class="edit-input" value="<?php echo htmlspecialchars($game['date']); ?>" style="display: none;">
-            </td>
-            <td>
-                <span class="display-value"><?php echo htmlspecialchars($game['time']); ?></span>
-                <input type="time" class="edit-input" value="<?php echo htmlspecialchars($game['time']); ?>" style="display: none;">
-            </td>
-            <td>
-                <span class="display-value"><?php echo htmlspecialchars($game['score_home']); ?></span>
-                <input type="text" class="edit-input" value="<?php echo htmlspecialchars($game['score_home']); ?>" style="display: none;">
-            </td>
-            <td>
-                <span class="display-value"><?php echo htmlspecialchars($game['score_away']); ?></span>
-                <input type="text" class="edit-input" value="<?php echo htmlspecialchars($game['score_away']); ?>" style="display: none;">
-            </td>
-            <td>
-                <button class="edit-btn" onclick="toggleEdit(this, <?php echo $game['match_id']; ?>)">Edit</button>
-                <button class="save-btn" onclick="saveChanges(this, <?php echo $game['match_id']; ?>)" style="display: none;">Save</button>
-                <button class="cancel-btn" onclick="cancelEdit(this, <?php echo $game['match_id']; ?>)" style="display: none;">Cancel</button>
-                <form method="POST" action="add_game.php" onsubmit="return confirm('Are you sure you want to remove this record?');" style="display:inline;">
+        <?php foreach ($games as $game) : ?>
+    <tr id="game_<?php echo $game['match_id']; ?>">
+        <td><?php echo htmlspecialchars($game['match_id']); ?></td>
+        <td><?php echo htmlspecialchars($game['league_name']); ?></td>
+        <td><?php echo htmlspecialchars($game['HomeClub']); ?></td>
+        <td><?php echo htmlspecialchars($game['AwayClub']); ?></td>
+        <td><?php echo htmlspecialchars($game['date']); ?></td>
+        <td><?php echo htmlspecialchars($game['time']); ?></td>
+        <td>
+            <span class="display-score" id="score_home_<?php echo $game['match_id']; ?>">
+                <?php echo htmlspecialchars($game['score_home']); ?>
+            </span>
+            <input type="number" class="edit-score" id="edit_score_home_<?php echo $game['match_id']; ?>" value="<?php echo $game['score_home']; ?>" style="display: none;">
+        </td>
+        <td>
+            <span class="display-score" id="score_away_<?php echo $game['match_id']; ?>">
+                <?php echo htmlspecialchars($game['score_away']); ?>
+            </span>
+            <input type="number" class="edit-score" id="edit_score_away_<?php echo $game['match_id']; ?>" value="<?php echo $game['score_away']; ?>" style="display: none;">
+        </td>
+        <td>
+            <button class="edit-btn" onclick="editGame(<?php echo $game['match_id']; ?>)">Edit</button>
+            <button class="save-btn" onclick="saveGame(<?php echo $game['match_id']; ?>)" style="display: none;">Save</button>
+            <form method="POST" action="add_game.php" onsubmit="return confirm('Are you sure you want to remove this record?');" style="display:inline;">
                     <input type="hidden" name="action" value="remove">
+                    <input type="hidden" name="type" value="game"> 
                     <input type="hidden" name="id" value="<?php echo $game['match_id']; ?>">
                     <input type="submit" value="Remove">
                 </form>
-            </td>
-        </tr>
-    <?php endforeach; ?>
+   
+        </td>
+        
+    </tr>
+<?php endforeach; ?>
+
 </tbody>
     </table>
 
@@ -283,16 +297,6 @@ $result = $stmt->get_result();
             <form method="POST" action="add_game.php">
                 <input type="hidden" name="action" value="update">
                 <input type="hidden" name="match_id" value="<?php echo $edit_game['match_id']; ?>">
-                <label for="league_id">League ID:</label>
-                <input type="number" name="league_id" value="<?php echo $edit_game['league_id']; ?>" required>
-                <label for="home_club_id">Home Club ID:</label>
-                <input type="number" name="home_club_id" value="<?php echo $edit_game['home_club_id']; ?>" required>
-                <label for="away_club_id">Away Club ID:</label>
-                <input type="number" name="away_club_id" value="<?php echo $edit_game['away_club_id']; ?>" required>
-                <label for="date">Date:</label>
-                <input type="date" name="date" value="<?php echo $edit_game['date']; ?>" required>
-                <label for="time">Time:</label>
-                <input type="time" name="time" value="<?php echo $edit_game['time']; ?>" required>
                 <label for="score_home">Home Score:</label>
                 <input type="text" name="score_home" value="<?php echo $edit_game['score_home']; ?>">
                 <label for="score_away">Away Score:</label>
@@ -303,82 +307,87 @@ $result = $stmt->get_result();
     <?php endif; ?>
 </div>
 <script>
-function toggleEdit(button, id) {
-    const row = document.getElementById(`game_${id}`);
-    const displayValues = row.getElementsByClassName('display-value');
-    const editInputs = row.getElementsByClassName('edit-input');
-    const editBtn = row.querySelector('.edit-btn');
-    const saveBtn = row.querySelector('.save-btn');
-    const cancelBtn = row.querySelector('.cancel-btn');
+function editGame(match_id) {
+    // Hide score display
+    document.getElementById("score_home_" + match_id).style.display = "none";
+    document.getElementById("score_away_" + match_id).style.display = "none";
 
-    Array.from(displayValues).forEach(span => span.style.display = 'none');
-    Array.from(editInputs).forEach(input => input.style.display = 'inline-block');
+    // Show input fields
+    document.getElementById("edit_score_home_" + match_id).style.display = "inline-block";
+    document.getElementById("edit_score_away_" + match_id).style.display = "inline-block";
 
-    editBtn.style.display = 'none';
-    saveBtn.style.display = 'inline-block';
-    cancelBtn.style.display = 'inline-block';
+    // Toggle buttons
+    document.querySelector(`#game_${match_id} .edit-btn`).style.display = "none";
+    document.querySelector(`#game_${match_id} .save-btn`).style.display = "inline-block";
 }
 
-function cancelEdit(button, id) {
-    const row = document.getElementById(`game_${id}`);
-    const displayValues = row.getElementsByClassName('display-value');
-    const editInputs = row.getElementsByClassName('edit-input');
-    const editBtn = row.querySelector('.edit-btn');
-    const saveBtn = row.querySelector('.save-btn');
-    const cancelBtn = row.querySelector('.cancel-btn');
+function saveGame(match_id) {
+    let score_home = document.getElementById("edit_score_home_" + match_id).value;
+    let score_away = document.getElementById("edit_score_away_" + match_id).value;
 
-    Array.from(displayValues).forEach(span => span.style.display = 'inline');
-    Array.from(editInputs).forEach((input, index) => {
-        input.style.display = 'none';
-        input.value = displayValues[index].textContent.trim();
-    });
+    // AJAX request to update the database
+    let xhr = new XMLHttpRequest();
+    xhr.open("POST", "add_game.php", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            let response = JSON.parse(xhr.responseText);
+            if (response.success) {
+                // Update UI without refreshing
+                document.getElementById("score_home_" + match_id).innerText = score_home;
+                document.getElementById("score_away_" + match_id).innerText = score_away;
 
-    editBtn.style.display = 'inline-block';
-    saveBtn.style.display = 'none';
-    cancelBtn.style.display = 'none';
-}
+                // Show updated scores
+                document.getElementById("score_home_" + match_id).style.display = "inline-block";
+                document.getElementById("score_away_" + match_id).style.display = "inline-block";
 
-function saveChanges(button, id) {
-    const row = document.getElementById(`game_${id}`);
-    const editInputs = row.getElementsByClassName('edit-input');
-    
-    const formData = new FormData();
-    formData.append('action', 'update');
-    formData.append('match_id', id);
-    formData.append('league_id', editInputs[0].value);
-    formData.append('home_club_id', editInputs[1].value);
-    formData.append('away_club_id', editInputs[2].value);
-    formData.append('date', editInputs[3].value);
-    formData.append('time', editInputs[4].value);
-    formData.append('score_home', editInputs[5].value);
-    formData.append('score_away', editInputs[6].value);
+                // Hide input fields
+                document.getElementById("edit_score_home_" + match_id).style.display = "none";
+                document.getElementById("edit_score_away_" + match_id).style.display = "none";
 
-    fetch('add_game.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.text())
-    .then(data => {
-        try {
-            // Update display values
-            const displayValues = row.getElementsByClassName('display-value');
-            Array.from(editInputs).forEach((input, index) => {
-                displayValues[index].textContent = input.value;
-            });
-            
-            // Reset display
-            cancelEdit(button, id);
-            alert('Game updated successfully!');
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Error updating game');
+                // Toggle buttons
+                document.querySelector(`#game_${match_id} .edit-btn`).style.display = "inline-block";
+                document.querySelector(`#game_${match_id} .save-btn`).style.display = "none";
+            } else {
+                alert("Error updating game: " + response.error);
+            }
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error updating game');
-    });
+    };
+    xhr.send("action=update&match_id=" + match_id + "&score_home=" + score_home + "&score_away=" + score_away);
 }
+
+// Add this to your existing <script> section
+document.addEventListener('DOMContentLoaded', function() {
+    // Find all remove game forms
+    const removeForms = document.querySelectorAll('form[action="add_game.php"]');
+    
+    removeForms.forEach(form => {
+        if (form.querySelector('input[value="remove"]')) {  // Only target remove forms
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();  // Prevent normal form submission
+                
+                if (confirm('Are you sure you want to remove this record?')) {
+                    const formData = new FormData(this);
+                    
+                    fetch('add_game.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.text())
+                    .then(data => {
+                        // Find and remove the game row
+                        const gameId = this.querySelector('input[name="id"]').value;
+                        document.getElementById('game_' + gameId).remove();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error removing game');
+                    });
+                }
+            });
+        }
+    });
+});
 </script>
 </body>
 </html>
