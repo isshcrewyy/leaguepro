@@ -302,3 +302,23 @@ option {
   padding: 10px;
   font-size: 16px;
 }
+
+
+
+
+
+/* Styling for the Add Club button */
+button[name="add_club"] {
+  background-color: #3498db;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+button[name="add_club"]:hover {
+  background-color: #2980b9;
+}

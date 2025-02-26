@@ -3,8 +3,16 @@
 include 'db_connection.php';
 session_start();
 
-if (!isset($_SESSION['name'])) {
+// Ensure the user is logged in
+if (!isset($_SESSION['userId'])) {
+    session_destroy();
     header("Location: login.php");
+    exit();
+}
+
+// Ensure the user is approved
+if (!isset($_SESSION['status']) || $_SESSION['status'] !== 'approved') {
+    header("Location: org_dashboard.php");
     exit();
 }
 
@@ -151,26 +159,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <title>Your Team</title>
     <link rel="stylesheet" href="../assests/css/playerForm.css">
     <script src="../assests/js/playerScript.js"></script>
+  
 </head>
 <body>
 
 <nav class="navbar">
-        <a href="org_dashboard.php" class="logo">Organizer</a>
-        <span class="menu-toggle" onclick="toggleMenu()">☰</span>
-        <ul id="nav-links">
-        <li><a href="club.php">Your Clubs</a></li>
+    <a href="org_dashboard.php" class="logo">Organizer</a>
+    <span class="menu-toggle" onclick="toggleMenu()">☰</span>
+    <ul id="nav-links">
+        <?php if (isset($_SESSION['status']) && $_SESSION['status'] === 'approved') : ?>
+            <li><a href="club.php">Your Clubs</a></li>
             <li><a href="team.php">Your Team</a></li>
             <li><a href="add_game.php">Add Game</a></li>
             <li><a href="leaderboard.php">Leaderboard</a></li>
-            <li>
-                <form action="logout.php" method="post" style="display:inline;">
-                    <button type="submit" class="logout-btn">Logout</button>
-                </form>
-            </li>
-        </ul>
-    </nav>
+        <?php else : ?>
+            <li><a href="#">Approval Pending...</a></li>
+        <?php endif; ?>
+        
+        <li>
+            <form action="logout.php" method="post" style="display:inline;">
+                <button type="submit" class="logout-btn">Logout</button>
+            </form>
+        </li>
+    </ul>
+</nav>
 
 <div class="container">
+   
     <h1>Your Team</h1>
     
     <!-- Tabs Navigation -->

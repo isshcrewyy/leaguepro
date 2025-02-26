@@ -24,7 +24,10 @@ $result = null;
 $stmt = null; // Initialize the statement variable
 
 if ($selected_league) {
-    $sql = "SELECT * FROM leaderboard WHERE league_id = ?";
+    $sql = "SELECT l.*, c.c_name AS club_name 
+            FROM leaderboard l 
+            JOIN club c ON l.club_id = c.club_id 
+            WHERE l.league_id = ? AND l.matches_played > 0";
     $stmt = $conn->prepare($sql);
     
     if ($stmt) {
@@ -42,9 +45,16 @@ if ($selected_league) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leaderboard</title>
     <style>
-        /* General page layout */
+        /* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body and Container */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Roboto', sans-serif;
     background-color: #f4f4f4;
     color: #333;
     margin: 0;
@@ -53,7 +63,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    height: 100vh;
+    min-height: 100vh;
 }
 
 /* Header styling */
@@ -158,7 +168,6 @@ tr:hover {
         padding: 10px;
     }
 }
-
     </style>
 </head>
 <body>
@@ -186,8 +195,9 @@ tr:hover {
 // Display leaderboard if a league is selected
 if ($result && $result->num_rows > 0) {
     echo "<h2>Leaderboard for Selected League</h2>";
-    echo "<table border='1'>
+    echo "<table>
             <tr>
+                <th>Team Name</th>
                 <th>Matches Played</th>
                 <th>Wins</th>
                 <th>Losses</th>
@@ -201,6 +211,7 @@ if ($result && $result->num_rows > 0) {
     // Fetch and display each row of data
     while ($row = $result->fetch_assoc()) {
         echo "<tr>
+                <td>{$row['club_name']}</td>
                 <td>{$row['matches_played']}</td>
                 <td>{$row['wins']}</td>
                 <td>{$row['losses']}</td>

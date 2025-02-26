@@ -129,9 +129,7 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>League Fixtures</title>
     <link rel="stylesheet" href="../assests/css/style.css">
-    <script>
-        
-    </script>
+    
 </head>
 <body>
 <div class="button-group">
@@ -143,7 +141,7 @@ $conn->close();
             <h1>League Fixtures</h1>
             <h2>League: <?php echo htmlspecialchars($league['league_name']); ?></h2>
             <div class="button-group">
-            <a href="view_leaderboard.php" class="btn">Leaderboard</a>
+           
             </div>
         </header>
 

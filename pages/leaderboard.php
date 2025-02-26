@@ -1,22 +1,30 @@
 <?php
 // Start the session
 session_start();
-$name = $_SESSION['name'];
-$userId = $_SESSION['userId'];
 
-// Ensure that the user is logged in
+// Ensure the user is logged in
 if (!isset($_SESSION['userId'])) {
     session_destroy();
     header("Location: login.php");
     exit();
 }
 
+// Ensure the user is approved
+if (!isset($_SESSION['status']) || $_SESSION['status'] !== 'approved') {
+    header("Location: org_dashboard.php");
+    exit();
+}
+$name = $_SESSION['name'];
+$userId = $_SESSION['userId'];
+
+
+
 // Connect to the database
 require 'db_connection.php';
 
 // Fetch the league ID from a request or set it dynamically
 
- // Assuming it's passed as a query parameter
+// Assuming it's passed as a query parameter
 
 // Fetch all games from the database for the selected league
 $query = "SELECT * FROM game WHERE created_by = ? ";
@@ -45,7 +53,8 @@ while ($row = $result->fetch_assoc()) {
             'draws' => 0,
             'goals_scored' => 0,
             'goal_difference' => 0,
-            'points' => 0
+            'points' => 0,
+            'club_name' => ''
         ];
     }
     if (!isset($leaderboard[$away_club_id])) {
@@ -56,7 +65,8 @@ while ($row = $result->fetch_assoc()) {
             'draws' => 0,
             'goals_scored' => 0,
             'goal_difference' => 0,
-            'points' => 0
+            'points' => 0,
+            'club_name' => ''
         ];
     }
 
@@ -90,9 +100,28 @@ while ($row = $result->fetch_assoc()) {
     }
 }
 
-// Sort leaderboard by points (highest first)
+// Fetch club names
+$club_ids = array_keys($leaderboard);
+if (!empty($club_ids)) {
+    $placeholders = implode(',', array_fill(0, count($club_ids), '?'));
+    $types = str_repeat('s', count($club_ids));
+    $query = "SELECT club_id, c_name FROM club WHERE club_id IN ($placeholders)";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param($types, ...$club_ids);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    while ($row = $result->fetch_assoc()) {
+        $leaderboard[$row['club_id']]['club_name'] = $row['c_name'];
+    }
+}
+
+// Sort leaderboard by points (highest first), then by goal difference
 uasort($leaderboard, function ($a, $b) {
-    return $b['points'] - $a['points'];
+    if ($b['points'] != $a['points']) {
+        return $b['points'] - $a['points'];
+    }
+    return $b['goal_difference'] - $a['goal_difference'];
 });
 
 // Save the leaderboard to the database
@@ -165,10 +194,15 @@ foreach ($leaderboard as $club_id => $data) {
     <a href="org_dashboard.php" class="logo">Organizer</a>
     <span class="menu-toggle" onclick="toggleMenu()">☰</span>
     <ul id="nav-links">
-        <li><a href="club.php">Your Clubs</a></li>
-        <li><a href="team.php">Your Team</a></li>
-        <li><a href="add_game.php">Add Game</a></li>
-        <li><a href="leaderboard.php" class="active">Leaderboard</a></li>
+        <?php if (isset($_SESSION['status']) && $_SESSION['status'] === 'approved') : ?>
+            <li><a href="club.php">Your Clubs</a></li>
+            <li><a href="team.php">Your Team</a></li>
+            <li><a href="add_game.php">Add Game</a></li>
+            <li><a href="leaderboard.php">Leaderboard</a></li>
+        <?php else : ?>
+            <li><a href="#">Approval Pending...</a></li>
+        <?php endif; ?>
+        
         <li>
             <form action="logout.php" method="post" style="display:inline;">
                 <button type="submit" class="logout-btn">Logout</button>
@@ -176,6 +210,7 @@ foreach ($leaderboard as $club_id => $data) {
         </li>
     </ul>
 </nav>
+
 
 <h2>Leaderboard</h2>
 <div class="leaderboard-container">
@@ -185,6 +220,7 @@ foreach ($leaderboard as $club_id => $data) {
                 <th>Rank</th>
                 <th>League ID</th>
                 <th>Club ID</th>
+                <th>Club Name</th>
                 <th>Matches Played</th>
                 <th>Wins</th>
                 <th>Losses</th>
@@ -202,6 +238,7 @@ foreach ($leaderboard as $club_id => $data) {
                     <td><?php echo $rank++; ?></td>
                     <td><?php echo htmlspecialchars($league_id); ?></td>
                     <td><?php echo htmlspecialchars($club_id); ?></td>
+                    <td><?php echo htmlspecialchars($data['club_name']); ?></td>
                     <td><?php echo $data['matches_played']; ?></td>
                     <td><?php echo $data['wins']; ?></td>
                     <td><?php echo $data['losses']; ?></td>

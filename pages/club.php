@@ -1,6 +1,19 @@
 <?php
-// Start the session
 session_start();
+
+// Ensure the user is logged in
+if (!isset($_SESSION['userId'])) {
+    session_destroy();
+    header("Location: login.php");
+    exit();
+}
+
+// Ensure the user is approved
+if (!isset($_SESSION['status']) || $_SESSION['status'] !== 'approved') {
+    header("Location: org_dashboard.php");
+    exit();
+}
+
 $name = $_SESSION['name'];
 $userId = $_SESSION['userId'];
 
@@ -101,10 +114,15 @@ $club_result = $club_stmt->get_result();
     <a href="org_dashboard.php" class="logo">Organizer</a>
     <span class="menu-toggle" onclick="toggleMenu()">☰</span>
     <ul id="nav-links">
-        <li><a href="club.php">Your Clubs</a></li>
-        <li><a href="team.php">Your Team</a></li>
-        <li><a href="add_game.php">Add Game</a></li>
-        <li><a href="leaderboard.php">Leaderboard</a></li>
+        <?php if (isset($_SESSION['status']) && $_SESSION['status'] === 'approved') : ?>
+            <li><a href="club.php">Your Clubs</a></li>
+            <li><a href="team.php">Your Team</a></li>
+            <li><a href="add_game.php">Add Game</a></li>
+            <li><a href="leaderboard.php">Leaderboard</a></li>
+        <?php else : ?>
+            <li><a href="#">Approval Pending...</a></li>
+        <?php endif; ?>
+        
         <li>
             <form action="logout.php" method="post" style="display:inline;">
                 <button type="submit" class="logout-btn">Logout</button>
@@ -112,6 +130,7 @@ $club_result = $club_stmt->get_result();
         </li>
     </ul>
 </nav>
+
 <h1>Club Management</h1>
 
 <!-- Add New Club Form -->

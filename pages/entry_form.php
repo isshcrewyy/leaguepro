@@ -1,4 +1,3 @@
-
 <?php
 // Include database connection (if not already included)
 require_once('db_connection.php');
@@ -15,13 +14,11 @@ if (!isset($_SESSION['userId'])) {
 
 $userId = $_SESSION['userId'];  // Get the logged-in user's ID
 
-
 if (isset($_POST['submit_form'])) {
     // Gather form inputs and sanitize them
     $league_name = $_POST['league_name'];
     $duration = $_POST['duration'];
     $max_teams = filter_var($_POST['max_teams'], FILTER_SANITIZE_NUMBER_INT);
-    $one_league = $_POST['one_league'];
     $start_date = $_POST['start_date'];
     
     // Automatically calculate the end_date based on the duration
@@ -34,27 +31,23 @@ if (isset($_POST['submit_form'])) {
     $experience = filter_var($_POST['experience'], FILTER_SANITIZE_STRING);
     $location = filter_var($_POST['location'], FILTER_SANITIZE_STRING);
     $rules = filter_var($_POST['rules'], FILTER_SANITIZE_STRING);
-    $season = $_POST['season']; // Assuming this is an additional field in the form for the season
-
+    
     // Insert into 'form' table, including the logged-in user's ID
-    $stmt = $conn->prepare("INSERT INTO form (league_name, userId, duration, max_teams, one_league, start_date, end_date, experience, location, rules) VALUES (?,?,?,?,?,?,?,?,?,?)");
-    $stmt->bind_param("siisisssss", $league_name, $userId, $duration, $max_teams, $one_league, $start_date, $end_date, $experience, $location, $rules);
+    $stmt = $conn->prepare("INSERT INTO form (league_name, userId, duration, max_teams, start_date, end_date, experience, location, rules) VALUES (?,?,?,?,?,?,?,?,?)");
+    $stmt->bind_param("siisissss", $league_name, $userId, $duration, $max_teams, $start_date, $end_date, $experience, $location, $rules);
 
     if ($stmt->execute()) {
-        // Insert into 'league' table with the common details
-      // Insert into 'league' table with the additional details
-$league_stmt = $conn->prepare("INSERT INTO league (league_name, userId, start_date, end_date, season, duration, max_teams, location) VALUES (?,?,?,?,?,?,?,?)");
-$league_stmt->bind_param("sissssis", $league_name, $userId, $start_date, $end_date, $season, $duration, $max_teams, $location);
+        // Insert into 'league' table with the additional details
+        $league_stmt = $conn->prepare("INSERT INTO league (league_name, userId, start_date, end_date, duration, max_teams, location) VALUES (?,?,?,?,?,?,?)");
+        $league_stmt->bind_param("sisssis", $league_name, $userId, $start_date, $end_date, $duration, $max_teams, $location);
 
-if ($league_stmt->execute()) {
-    echo "<script>alert('Form and league details submitted successfully!');</script>";
-    header("Location: login.php");
-    exit;
-} else {
-    echo "<script>alert('Error inserting into the league table.');</script>";
-}
-
-
+        if ($league_stmt->execute()) {
+            echo "<script>alert('Form and league details submitted successfully!');</script>";
+            header("Location: login.php");
+            exit;
+        } else {
+            echo "<script>alert('Error inserting into the league table.');</script>";
+        }
 
         $league_stmt->close();
     } else {
@@ -77,7 +70,7 @@ function calculateEndDate($start_date, $duration) {
         case '6 months':
             $start_date_obj->modify("+6 months");
             break;
-        case '1 year':
+        case '12 months':
             $start_date_obj->modify("+1 year");
             break;
     }
@@ -109,7 +102,7 @@ function calculateEndDate($start_date, $duration) {
                 <option value="1 month">1 Month</option>
                 <option value="3 months">3 Months</option>
                 <option value="6 months">6 Months</option>
-                <option value="1 year">1 Year</option>
+                <option value="12 months">12 Months</option>
             </select>
 
             <!-- Maximum Teams -->
@@ -118,16 +111,9 @@ function calculateEndDate($start_date, $duration) {
                 <?php for ($i = 1; $i <= 9; $i++) echo "<option value=\"$i\">$i</option>"; ?>
             </select>
 
-            <!-- One League -->
-            <label for="one_league">Do you agree to manage only one league at a time?</label>
-            <select name="one_league" required>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-            </select>
-
             <!-- Start Date -->
             <label for="start_date">Start Date</label>
-            <input type="date" name="start_date" required>
+            <input type="date" name="start_date" id="start_date" required>
 
             <!-- End Date (Auto-calculated) -->
             <label for="end_date">End Date</label>
@@ -178,7 +164,7 @@ function calculateEndDate() {
             case '6 months':
                 endDate.setMonth(endDate.getMonth() + 6);
                 break;
-            case '1 year':
+            case '12 months':
                 endDate.setFullYear(endDate.getFullYear() + 1);
                 break;
         }
@@ -192,6 +178,30 @@ function formatDate(date) {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+}
+
+// JavaScript to validate that the start date is in the future
+document.querySelector('[name="start_date"]').addEventListener('input', function() {
+    const startDate = new Date(this.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set time to midnight to compare only dates
+
+    if (startDate <= today) {
+        alert("Start date must be in the future.");
+        this.value = ''; // Clear the invalid date
+    }
+});
+
+function validateDates() {
+    const startDate = new Date(document.querySelector('[name="start_date"]').value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set time to midnight to compare only dates
+
+    if (startDate <= today) {
+        alert("Start date must be in the future.");
+        return false;
+    }
+    return true;
 }
 </script>
 

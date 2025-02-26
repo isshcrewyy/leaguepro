@@ -24,13 +24,6 @@ $result = $stmt->get_result();
 // Check if user exists
 if ($result->num_rows > 0) {
     $user = $result->fetch_assoc();
-
-    // Ensure the user is approved
-    if ($user['status'] !== 'approved') {
-        session_destroy();
-        header("Location: login.php");
-        exit();
-    }
 } else {
     session_destroy();
     header("Location: login.php");
@@ -51,21 +44,16 @@ $league = $league_result->fetch_assoc();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Organizer Dashboard</title>
+    <title>Waiting for approval</title>
     <link rel="stylesheet" href="../assests/css/dashboardstyle.css">
 </head>
 <body>
-
-    <h1>Organizer Dashboard</h1>
+    <h1>Waiting for approval</h1>
 
     <nav class="navbar">
-        <a href="org_dashboard.php" class="logo">Organizer</a>
+        <a href="#" class="logo">Organizer</a>
         <span class="menu-toggle" onclick="toggleMenu()">☰</span>
         <ul id="nav-links">
-        <li><a href="club.php">Your Clubs</a></li>
-            <li><a href="team.php">Your Team</a></li>
-            <li><a href="add_game.php">Add Game</a></li>
-            <li><a href="leaderboard.php">Leaderboard</a></li>
             <li>
                 <form action="logout.php" method="post" style="display:inline;">
                     <button type="submit" class="logout-btn">Logout</button>
@@ -74,49 +62,13 @@ $league = $league_result->fetch_assoc();
         </ul>
     </nav>
 
-<?php if (isset($_SESSION['status'])): ?> 
-    <?php if ($_SESSION['status'] === 'approved'): ?>
-        <p style="color: green; font-weight: bold;">Your account is approved!</p> 
-    <?php else: ?>
-        <p style="color: red; font-weight: bold;">Your account is pending approval.</p> 
-    <?php endif; ?>
-<?php endif; ?>
-
-
-    <!-- Approval Modal -->
-<div id="approvalModal" class="modal hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-96 text-center">
-        <h2 class="text-xl font-bold text-green-600">Form Approved!</h2>
-        <p class="mt-2">Your LeaguePro registration form has been approved. You can now create leagues.</p>
-        <button onclick="closeModal()" class="mt-4 bg-green-500 text-white px-4 py-2 rounded">OK</button>
-    </div>
-</div>
-
-<!-- Modal Styles -->
-<style>
-    .hidden { display: none; }
-</style>
-
-<!-- Modal Script -->
-<script>
-    function closeModal() {
-        document.getElementById("approvalModal").classList.add("hidden");
-    }
-
-    // Show modal if PHP session has approval
-    window.onload = function() {
-        <?php if (isset($_SESSION['approval_status']) && $_SESSION['approval_status'] == 1): ?>
-            document.getElementById("approvalModal").classList.remove("hidden");
-            <?php unset($_SESSION['approval_status']); // Clear session after showing modal ?>
-        <?php endif; ?>
-    };
-</script>
+    <p style="color: red; font-weight: bold;">Your account is pending approval. Limited access granted.</p>
 
     <div class="details-container">
         <!-- User Details Section -->
         <div class="details-section">
             <h2>User Details</h2>
-            <p><strong>User ID:</strong> <?php echo htmlspecialchars($user['userId']); ?></p>
+            <!--<p><strong>User ID:</strong> <?php// echo htmlspecialchars($user['userId']); ?></p> -->
             <p><strong>Name:</strong> <?php echo htmlspecialchars($user['name']); ?></p>
             <p><strong>Email:</strong> <?php echo htmlspecialchars($user['email']); ?></p>
             <p><strong>Created At:</strong> <?php echo htmlspecialchars($user['created_at']); ?></p>
@@ -135,6 +87,5 @@ $league = $league_result->fetch_assoc();
             <?php endif; ?>
         </div>
     </div>
-
 </body>
 </html>

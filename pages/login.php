@@ -1,4 +1,4 @@
-<?php
+<?php 
 session_start();
 require 'db_connection.php'; // Include your database connection
 ini_set('display_errors', 1);
@@ -15,45 +15,45 @@ if (isset($_POST['login'])) {
     // Check if email and password are provided
     if (empty($email) || empty($password)) {
         $message = 'Email or password is missing.';
-    }
-
-    // Fetch user details from database
-    $stmt = $conn->prepare("SELECT * FROM user WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    // Debugging: Check if user is found
-    if ($result->num_rows > 0) {
-        $user = $result->fetch_assoc();
-        echo "User found: " . $user['email'] . "<br>"; // Debugging: Display user email
     } else {
-        echo "No user found with that email";  // Debugging: No user found
-    }
+        // Fetch user details from database
+        $stmt = $conn->prepare("SELECT userId, name, email, password, status FROM user WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-    // If the user exists, verify password
-    if (isset($user) && password_verify($password, $user['password'])) {
-        echo "Password is correct"; // Debugging: password verification
-        if ($user['status'] === 'approved') {
-            // Start session and redirect to dashboard
-            session_regenerate_id(true);
-            $_SESSION['userId'] = $user['userId'];
-            $_SESSION['name'] = $user['name'];
-            $_SESSION['email'] = $user['email'];
-
-            // Debugging: Check if session variables are set
-            echo "Session variables set. User ID: " . $_SESSION['userId'] . "<br>";
+        if ($result->num_rows > 0) {
+            $user = $result->fetch_assoc();
             
-            header('Location: org_dashboard.php');
-            exit();
+            // Verify password
+            if (password_verify($password, $user['password'])) {
+                $userId = $user['userId'];
+
+                // Store session data
+                session_regenerate_id(true);
+                $_SESSION['userId'] = $userId;
+                $_SESSION['name'] = $user['name'];
+                $_SESSION['email'] = $user['email'];
+                $_SESSION['status'] = $user['status']; // Store user status
+
+                // Redirect based on approval status
+                if ($_SESSION['status'] === 'approved') {
+                    header('Location: org_dashboard.php'); // Full access
+                } else {
+                    header('Location: limited_dashboard.php'); // Restricted access
+                }
+                exit();
+            } else {
+                $message = 'Invalid email or password.';
+            }
         } else {
-            $message = 'Your account is not approved yet. Please wait for approval.';
+            $message = "No user found with that email.";
         }
-    } else {
-        $message = 'Invalid email or password.'; // Invalid credentials
     }
 }
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -82,9 +82,7 @@ if (isset($_POST['login'])) {
             <label for="password">Password</label>
             <input type="password" name="password" required>
 
-            <label for="remember_me">
-                <input type="checkbox" name="remember_me"> Remember me
-            </label>
+            
 
             <button type="submit" name="login">Login</button>
             <p class="register-prompt">Don't have an account? <a href="registration.php">Register here</a></p>
