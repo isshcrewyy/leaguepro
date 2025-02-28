@@ -72,6 +72,30 @@ $conn->close();
         .button-group .btn:hover {
             background-color: #2980b9;
         }
+
+        .breadcrumb {
+            margin: 20px 0;
+            padding: 10px 16px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+        }
+
+        .breadcrumb a {
+            color: #3498db;
+            text-decoration: none;
+            padding: 0 5px;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb span {
+            padding: 0 5px;
+        }
     </style>
 </head>
 <body>
@@ -84,6 +108,12 @@ $conn->close();
     </div>
     <h1>Welcome, Fans! Choose a League</h1>
 </header>
+
+<!-- Breadcrumb Navigation -->
+<div class="breadcrumb">
+    <a href="index.php">Home</a> <span>&gt;</span>
+    <span>Fans</span>
+</div>
 
 <div class="container">
     <h2>Select a League to View Details</h2>

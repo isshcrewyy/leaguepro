@@ -1,4 +1,5 @@
 <?php
+// Start the session
 session_start();
 
 // Database connection
@@ -11,7 +12,6 @@ $conn = new mysqli($host, $user, $password, $dbname);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
-
 
 // Get the league_id and club_id from the URL
 $league_id = isset($_GET['league_id']) ? (int)$_GET['league_id'] : 0;
@@ -44,6 +44,7 @@ if ($clubsResult && $clubsResult->num_rows > 0) {
         $clubs[$club['club_id']] = $club;  // Use club_id as the array key
     }
 }
+
 // Fetch Players for the selected Club (only if club_id is valid)
 $players = [];
 if ($club_id > 0) {
@@ -120,8 +121,6 @@ if ($matchesResult && $matchesResult->num_rows > 0) {
 
 $conn->close();
 ?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -129,152 +128,139 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>League Fixtures</title>
     <link rel="stylesheet" href="../assests/css/style.css">
-    
+    <script>
+        function showPlayers(clubId) {
+            // Fetch players via AJAX
+            fetch(`fetch_players.php?club_id=${clubId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const playerList = document.getElementById('player-list');
+                    playerList.innerHTML = ''; // Clear existing content
+
+                    if (data.length === 0) {
+                        playerList.innerHTML = '<p>No players found for this club.</p>';
+                    } else {
+                        data.forEach(player => {
+                            const playerItem = document.createElement('li');
+                            playerItem.textContent = `Name: ${player.p_name}, Age: ${player.age}, Position: ${player.position}`;
+                            playerList.appendChild(playerItem);
+                        });
+                    }
+
+                    // Show the popup
+                    document.getElementById('player-popup').style.display = 'block';
+                })
+                .catch(error => console.error('Error fetching players:', error));
+        }
+
+        function closePopup() {
+            document.getElementById('player-popup').style.display = 'none';
+        }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.location.hash) {
+                const element = document.querySelector(window.location.hash);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        });
+    </script>
+
 </head>
 <body>
-<div class="button-group">
-    <a href="index.php" class="btn">League Pro</a>
-</div>
+<div class="container">
+    <!-- Breadcrumb Navigation -->
+    <div class="breadcrumb">
+        <a href="index.php">Home</a> <span>&gt;</span>
+        <a href="fans.php">Fans</a> <span>&gt;</span>
+        <span>League Fixtures</span>
+    </div>
 
-    <div class="container">
-        <header>
+    <header>
+        <div>
             <h1>League Fixtures</h1>
             <h2>League: <?php echo htmlspecialchars($league['league_name']); ?></h2>
-            <div class="button-group">
-           
-            </div>
-        </header>
+        </div>
+        <!-- Button Group -->
+        <div class="button-group">
+            <a href="view_league.php?league_id=<?php echo $league_id; ?>&view=past_matches#past-matches" class="btn">Past Matches</a>
+            <a href="view_league.php?league_id=<?php echo $league_id; ?>&view=upcoming_matches#upcoming-matches" class="btn">Upcoming Matches</a>
+        </div>
+    </header>
 
-        <!-- Clubs Section -->
-        <section>
-            <h2>Clubs in this League</h2>
-            <div class="card-container">
-                <?php if (empty($clubs)): ?>
-                    <p>No clubs available in this league.</p>
-                <?php else: ?>
-                    <?php foreach ($clubs as $club): ?>
-                        <div class="card">
-                            <h3><?php echo htmlspecialchars($club['c_name']); ?></h3>
-                            <p>Location: <?php echo htmlspecialchars($club['location']); ?></p>
-                            <div class="button-group">
-                            <a href="?league_id=<?php echo $league_id; ?>&club_id=<?php echo $club['club_id']; ?>">View Players</a>
-                         </div>
-                </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-        </section>
-
-                    <!-- Players Section -->
-                    <?php if ($club_id > 0 && !empty($players)): ?>
-                        <section>
-                            <h2>Players</h2>
-                            <div class="card-container">
-                                <?php foreach ($players as $player): ?>
-                                    <div class="card">
-                                        <h3><?php echo htmlspecialchars($player['p_name']); ?></h3>
-                                        <p>Age: <?php echo htmlspecialchars($player['age']); ?></p>
-                                        <p>Position: <?php echo htmlspecialchars($player['position']); ?></p>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        </section>
-                    <?php elseif ($club_id > 0): ?>
-                        <section>
-                            <h2>No players found for this club</h2>
-                        </section>
-                    <?php endif; ?>
-
-                     <!-- coach Section -->
-                     <?php if ($club_id > 0 && !empty($coachs)): ?>
-                        <section>
-                            <h2>Coach</h2>
-                            <div class="card-container">
-                                <?php foreach ($coachs as $coach): ?>
-                                    <div class="card">
-                                        <h3><?php echo htmlspecialchars($coach['co_name']); ?></h3>
-                                        <p>Age: <?php echo htmlspecialchars($coach['age']); ?></p>
-                                        <p>Experience <?php echo htmlspecialchars($coach['experience']); ?></p>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        </section>
-                    <?php elseif ($club_id > 0): ?>
-                        <section>
-                            <h2>No coach found for this club</h2>
-                        </section>
-                    <?php endif; ?>
-
-        <!-- Past Matches Section -->
-        <section>
-            <h2>Past Matches</h2>
-            <div class="matches">
-                <?php if (empty($pastMatches)): ?>
-                    <p>No past matches available.</p>
-                <?php else: ?>
-                    <?php foreach ($pastMatches as $match): ?>
-                        <div class="match-card">
-                            <p><strong><?php echo htmlspecialchars($clubs[$match['home_club_id']]['c_name'] ?? 'Unknown'); ?></strong> 
-                            vs <strong><?php echo htmlspecialchars($clubs[$match['away_club_id']]['c_name'] ?? 'Unknown'); ?></strong></p>
-                            <p>Date: <?php echo htmlspecialchars($match['date']); ?></p>
-                            <p>Time: <?php echo htmlspecialchars($match['time']); ?></p>
-                            <p>Score: <?php echo htmlspecialchars($match['score_home']); ?> - <?php echo htmlspecialchars($match['score_away']); ?></p>
+    <!-- Clubs Section -->
+    <section>
+        <h2>Clubs in this League</h2>
+        <div class="card-container">
+            <?php if (empty($clubs)): ?>
+                <p>No clubs available in this league.</p>
+            <?php else: ?>
+                <?php foreach ($clubs as $club): ?>
+                    <div class="card">
+                        <h3><?php echo htmlspecialchars($club['c_name']); ?></h3>
+                        <p>Location: <?php echo htmlspecialchars($club['location']); ?></p>
+                        <div class="button-group">
+                            <a href="javascript:void(0);" onclick="showPlayers(<?php echo $club['club_id']; ?>)">View Players</a>
                         </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-        </section>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+    </section>
 
-        <!-- Upcoming Matches Section -->
-        <section>
-            <h2>Upcoming Matches</h2>
-            <div class="matches">
-                <?php if (empty($upcomingMatches)): ?>
-                    <p>No upcoming matches available.</p>
-                <?php else: ?>
-                    <?php foreach ($upcomingMatches as $match): ?>
-                        <div class="match-card">
-                            <p><strong><?php echo htmlspecialchars($clubs[$match['home_club_id']]['c_name'] ?? 'Unknown'); ?></strong> 
-                            vs <strong><?php echo htmlspecialchars($clubs[$match['away_club_id']]['c_name'] ?? 'Unknown'); ?></strong></p>
-                            <p>Date: <?php echo htmlspecialchars($match['date']); ?></p>
-                            <p>Time: <?php echo htmlspecialchars($match['time']); ?></p>
-                            <p>Score: <?php echo htmlspecialchars($match['score_home']); ?> - <?php echo htmlspecialchars($match['score_away']); ?></p>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-        </section>
-
-        <!-- Leaderboard Section -->
-        <?php if (isset($_GET['view']) && $_GET['view'] == 'leaderboard'): ?>
-            <section>
-                <h2>Leaderboard</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Club</th>
-                            <th>Points</th>
-                            <th>Wins</th>
-                            <th>Losses</th>
-                            <th>Draws</th>
-                            <th>Goal Difference</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($leaderboard as $entry): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($clubs[$entry['club_id']]['c_name'] ?? 'Unknown'); ?></td>
-                                <td><?php echo htmlspecialchars($entry['points']); ?></td>
-                                <td><?php echo htmlspecialchars($entry['wins']); ?></td>
-                                <td><?php echo htmlspecialchars($entry['losses']); ?></td>
-                                <td><?php echo htmlspecialchars($entry['draws']); ?></td>
-                                <td><?php echo htmlspecialchars($entry['goal_difference']); ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </section>
-        <?php endif; ?>
+    <!-- Popup Structure -->
+    <div id="player-popup" class="popup">
+        <div class="popup-content">
+            <span class="close" onclick="closePopup()">&times;</span>
+            <h2>Players</h2>
+            <ul id="player-list"></ul>
+        </div>
     </div>
+
+    <!-- Past Matches Section -->
+    <?php if (isset($_GET['view']) && $_GET['view'] == 'past_matches'): ?>
+    <section id="past-matches">
+        <h2>Past Matches</h2>
+        <div class="matches">
+            <?php if (empty($pastMatches)): ?>
+                <p>No past matches available.</p>
+            <?php else: ?>
+                <?php foreach ($pastMatches as $match): ?>
+                    <div class="match-card">
+                        <p><strong><?php echo htmlspecialchars($clubs[$match['home_club_id']]['c_name'] ?? 'Unknown'); ?></strong> 
+                        vs <strong><?php echo htmlspecialchars($clubs[$match['away_club_id']]['c_name'] ?? 'Unknown'); ?></strong></p>
+                        <p>Date: <?php echo htmlspecialchars($match['date']); ?></p>
+                        <p>Time: <?php echo htmlspecialchars($match['time']); ?></p>
+                        <p>Score: <?php echo htmlspecialchars($match['score_home']); ?> - <?php echo htmlspecialchars($match['score_away']); ?></p>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- Upcoming Matches Section -->
+    <?php if (isset($_GET['view']) && $_GET['view'] == 'upcoming_matches'): ?>
+    <section id="upcoming-matches">
+        <h2>Upcoming Matches</h2>
+        <div class="matches">
+            <?php if (empty($upcomingMatches)): ?>
+                <p>No upcoming matches available.</p>
+            <?php else: ?>
+                <?php foreach ($upcomingMatches as $match): ?>
+                    <div class="match-card">
+                        <p><strong><?php echo htmlspecialchars($clubs[$match['home_club_id']]['c_name'] ?? 'Unknown'); ?></strong> 
+                        vs <strong><?php echo htmlspecialchars($clubs[$match['away_club_id']]['c_name'] ?? 'Unknown'); ?></strong></p>
+                        <p>Date: <?php echo htmlspecialchars($match['date']); ?></p>
+                        <p>Time: <?php echo htmlspecialchars($match['time']); ?></p>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+    </section>
+    <?php endif; ?>
+</div>
 </body>
 </html>

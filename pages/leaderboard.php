@@ -70,33 +70,36 @@ while ($row = $result->fetch_assoc()) {
         ];
     }
 
-    // Update matches played and goals scored
-    $leaderboard[$home_club_id]['matches_played']++;
-    $leaderboard[$away_club_id]['matches_played']++;
-    $leaderboard[$home_club_id]['goals_scored'] += $score_home;
-    $leaderboard[$away_club_id]['goals_scored'] += $score_away;
+    // Check if scores are valid numbers
+    if (is_numeric($score_home) && is_numeric($score_away)) {
+        // Update matches played and goals scored
+        $leaderboard[$home_club_id]['matches_played']++;
+        $leaderboard[$away_club_id]['matches_played']++;
+        $leaderboard[$home_club_id]['goals_scored'] += $score_home;
+        $leaderboard[$away_club_id]['goals_scored'] += $score_away;
 
-    // Calculate goals difference
-    $leaderboard[$home_club_id]['goal_difference'] += ($score_home - $score_away);
-    $leaderboard[$away_club_id]['goal_difference'] += ($score_away - $score_home);
+        // Calculate goals difference
+        $leaderboard[$home_club_id]['goal_difference'] += ($score_home - $score_away);
+        $leaderboard[$away_club_id]['goal_difference'] += ($score_away - $score_home);
 
-    // Calculate points, wins, losses, and draws
-    if ($score_home > $score_away) {
-        // Home wins
-        $leaderboard[$home_club_id]['points'] += 3;
-        $leaderboard[$home_club_id]['wins']++;
-        $leaderboard[$away_club_id]['losses']++;
-    } elseif ($score_home < $score_away) {
-        // Away wins
-        $leaderboard[$away_club_id]['points'] += 3;
-        $leaderboard[$away_club_id]['wins']++;
-        $leaderboard[$home_club_id]['losses']++;
-    } else {
-        // Draw
-        $leaderboard[$home_club_id]['points'] += 1;
-        $leaderboard[$away_club_id]['points'] += 1;
-        $leaderboard[$home_club_id]['draws']++;
-        $leaderboard[$away_club_id]['draws']++;
+        // Calculate points, wins, losses, and draws
+        if ($score_home > $score_away) {
+            // Home wins
+            $leaderboard[$home_club_id]['points'] += 3;
+            $leaderboard[$home_club_id]['wins']++;
+            $leaderboard[$away_club_id]['losses']++;
+        } elseif ($score_home < $score_away) {
+            // Away wins
+            $leaderboard[$away_club_id]['points'] += 3;
+            $leaderboard[$away_club_id]['wins']++;
+            $leaderboard[$home_club_id]['losses']++;
+        } else {
+            // Draw
+            $leaderboard[$home_club_id]['points'] += 1;
+            $leaderboard[$away_club_id]['points'] += 1;
+            $leaderboard[$home_club_id]['draws']++;
+            $leaderboard[$away_club_id]['draws']++;
+        }
     }
 }
 

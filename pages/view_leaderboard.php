@@ -1,41 +1,146 @@
 <?php
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "leaguedb"; // Replace with your database name
+// Start the session
+session_start();
 
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+// Ensure the user is logged in
+if (!isset($_SESSION['userId'])) {
+    session_destroy();
+    header("Location: login.php");
+    exit();
 }
+
+// Ensure the user is approved
+if (!isset($_SESSION['status']) || $_SESSION['status'] !== 'approved') {
+    header("Location: org_dashboard.php");
+    exit();
+}
+$name = $_SESSION['name'];
+$userId = $_SESSION['userId'];
+
+// Connect to the database
+require 'db_connection.php';
 
 // Fetch available leagues for the dropdown
 $leagueQuery = "SELECT league_id, league_name FROM league";
-$leagueResult = $conn->query($leagueQuery);
+$stmt = $conn->prepare($leagueQuery);
+$stmt->execute();
+$leagueResult = $stmt->get_result();
 
 // Handle form submission to get the selected league
 $selected_league = isset($_GET['league_id']) ? $_GET['league_id'] : null;
 
-// Fetch leaderboard details for the selected league
-$result = null;
-$stmt = null; // Initialize the statement variable
-
+// Fetch games for the selected league
+$games = [];
 if ($selected_league) {
-    $sql = "SELECT l.*, c.c_name AS club_name 
-            FROM leaderboard l 
-            JOIN club c ON l.club_id = c.club_id 
-            WHERE l.league_id = ? AND l.matches_played > 0";
+    $sql = "SELECT * FROM game WHERE league_id = ?";
     $stmt = $conn->prepare($sql);
-    
     if ($stmt) {
-        $stmt->bind_param("i", $selected_league); // Bind league ID
+        $stmt->bind_param("i", $selected_league);
         $stmt->execute();
         $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $games[] = $row;
+        }
+        $stmt->close();
     }
 }
+
+// Calculate leaderboard data
+$leaderboard = [];
+foreach ($games as $game) {
+    $home_club_id = $game['home_club_id'];
+    $away_club_id = $game['away_club_id'];
+    $score_home = $game['score_home'];
+    $score_away = $game['score_away'];
+
+    // Initialize home and away team if not already present
+    if (!isset($leaderboard[$home_club_id])) {
+        $leaderboard[$home_club_id] = [
+            'matches_played' => 0,
+            'wins' => 0,
+            'losses' => 0,
+            'draws' => 0,
+            'goals_scored' => 0,
+            'goals_against' => 0,
+            'goal_difference' => 0,
+            'points' => 0,
+            'club_name' => ''
+        ];
+    }
+    if (!isset($leaderboard[$away_club_id])) {
+        $leaderboard[$away_club_id] = [
+            'matches_played' => 0,
+            'wins' => 0,
+            'losses' => 0,
+            'draws' => 0,
+            'goals_scored' => 0,
+            'goals_against' => 0,
+            'goal_difference' => 0,
+            'points' => 0,
+            'club_name' => ''
+        ];
+    }
+
+    // Check if scores are valid numbers
+    if (is_numeric($score_home) && is_numeric($score_away)) {
+        // Update matches played and goals scored
+        $leaderboard[$home_club_id]['matches_played']++;
+        $leaderboard[$away_club_id]['matches_played']++;
+        $leaderboard[$home_club_id]['goals_scored'] += $score_home;
+        $leaderboard[$away_club_id]['goals_scored'] += $score_away;
+        $leaderboard[$home_club_id]['goals_against'] += $score_away;
+        $leaderboard[$away_club_id]['goals_against'] += $score_home;
+
+        // Calculate goals difference
+        $leaderboard[$home_club_id]['goal_difference'] += ($score_home - $score_away);
+        $leaderboard[$away_club_id]['goal_difference'] += ($score_away - $score_home);
+
+        // Calculate points, wins, losses, and draws
+        if ($score_home > $score_away) {
+            // Home wins
+            $leaderboard[$home_club_id]['points'] += 3;
+            $leaderboard[$home_club_id]['wins']++;
+            $leaderboard[$away_club_id]['losses']++;
+        } elseif ($score_home < $score_away) {
+            // Away wins
+            $leaderboard[$away_club_id]['points'] += 3;
+            $leaderboard[$away_club_id]['wins']++;
+            $leaderboard[$home_club_id]['losses']++;
+        } else {
+            // Draw
+            $leaderboard[$home_club_id]['points'] += 1;
+            $leaderboard[$away_club_id]['points'] += 1;
+            $leaderboard[$home_club_id]['draws']++;
+            $leaderboard[$away_club_id]['draws']++;
+        }
+    }
+}
+
+// Fetch club names
+$club_ids = array_keys($leaderboard);
+if (!empty($club_ids)) {
+    $placeholders = implode(',', array_fill(0, count($club_ids), '?'));
+    $types = str_repeat('i', count($club_ids));
+    $sql = "SELECT club_id, c_name FROM club WHERE club_id IN ($placeholders)";
+    $stmt = $conn->prepare($sql);
+    if ($stmt) {
+        $stmt->bind_param($types, ...$club_ids);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $leaderboard[$row['club_id']]['club_name'] = $row['c_name'];
+        }
+        $stmt->close();
+    }
+}
+
+// Sort leaderboard by points (highest first), then by goal difference
+uasort($leaderboard, function ($a, $b) {
+    if ($b['points'] != $a['points']) {
+        return $b['points'] - $a['points'];
+    }
+    return $b['goal_difference'] - $a['goal_difference'];
+});
 ?>
 
 <!DOCTYPE html>
@@ -44,6 +149,7 @@ if ($selected_league) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leaderboard</title>
+    <link rel="stylesheet" href="../assests/css/leaderboard_style.css">
     <style>
         /* General Reset */
 * {
@@ -71,6 +177,30 @@ h2 {
     text-align: center;
     color: #2c3e50;
     margin-top: 20px;
+}
+
+.breadcrumb {
+    margin: 20px 0;
+    padding: 10px 16px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    position: absolute;
+    left: 20px;
+    top: 20px;
+}
+
+.breadcrumb a {
+    color: #3498db;
+    text-decoration: none;
+    padding: 0 5px;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb span {
+    padding: 0 5px;
 }
 
 /* Form styling */
@@ -191,13 +321,21 @@ tr:hover {
     <button type="submit">View Leaderboard</button>
 </form>
 
+<!-- Breadcrumb Navigation -->
+<div class="breadcrumb">
+    <a href="index.php">Home</a> <span>&gt;</span>
+    <a href="fans.php">Fans</a> <span>&gt;</span>
+    <span>Leaderboard</span>
+</div>
+
 <?php
 // Display leaderboard if a league is selected
-if ($result && $result->num_rows > 0) {
+if (!empty($leaderboard)) {
     echo "<h2>Leaderboard for Selected League</h2>";
     echo "<table>
             <tr>
-                <th>Team Name</th>
+                <th>Rank</th>
+                <th>Club Name</th>
                 <th>Matches Played</th>
                 <th>Wins</th>
                 <th>Losses</th>
@@ -209,18 +347,21 @@ if ($result && $result->num_rows > 0) {
             </tr>";
 
     // Fetch and display each row of data
-    while ($row = $result->fetch_assoc()) {
+    $rank = 1;
+    foreach ($leaderboard as $club_id => $data) {
         echo "<tr>
-                <td>{$row['club_name']}</td>
-                <td>{$row['matches_played']}</td>
-                <td>{$row['wins']}</td>
-                <td>{$row['losses']}</td>
-                <td>{$row['draws']}</td>
-                <td>{$row['goals_scored']}</td>
-                <td>{$row['goals_against']}</td>
-                <td>{$row['goal_difference']}</td>
-                <td>{$row['points']}</td>
+                <td>{$rank}</td>
+                <td>{$data['club_name']}</td>
+                <td>{$data['matches_played']}</td>
+                <td>{$data['wins']}</td>
+                <td>{$data['losses']}</td>
+                <td>{$data['draws']}</td>
+                <td>{$data['goals_scored']}</td>
+                <td>{$data['goals_against']}</td>
+                <td>{$data['goal_difference']}</td>
+                <td>{$data['points']}</td>
               </tr>";
+        $rank++;
     }
 
     echo "</table>";
@@ -228,12 +369,16 @@ if ($result && $result->num_rows > 0) {
     echo "No leaderboard data found for the selected league.";
 }
 
-// Close the statement and connection if they exist
-if ($stmt) {
-    $stmt->close();
-}
+// Close the connection
 $conn->close();
 ?>
+
+<script>
+    function toggleMenu() {
+        const navLinks = document.getElementById('nav-links');
+        navLinks.classList.toggle('active');
+    }
+</script>
 
 </body>
 </html>

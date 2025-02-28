@@ -61,13 +61,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $score_home = $_POST['score_home'];
         $score_away = $_POST['score_away'];
 
+        // Set default scores to NULL if not provided
+        $score_home = ($score_home === '') ? NULL : $score_home;
+        $score_away = ($score_away === '') ? NULL : $score_away;
+
         // Insert query to add a game
         $stmt = $conn->prepare("INSERT INTO game (league_id, home_club_id, away_club_id, date, time, score_home, score_away, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->bind_param("iiissssi", $league_id, $home_club_id, $away_club_id, $date, $time, $score_home, $score_away, $userId);
         $stmt->execute();
 
         header("Location: " . $_SERVER['PHP_SELF']);
-    exit();
+        exit();
     }
 
     // Handling form submission for removing a game
@@ -85,10 +89,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $match_id = $_POST['match_id'];
             $score_home = $_POST['score_home'];
             $score_away = $_POST['score_away'];
-    
+
+            // Set default scores to NULL if not provided
+            $score_home = ($score_home === '') ? NULL : $score_home;
+            $score_away = ($score_away === '') ? NULL : $score_away;
+
             $stmt = $conn->prepare("UPDATE game SET score_home = ?, score_away = ? WHERE match_id = ?");
             $stmt->bind_param("iii", $score_home, $score_away, $match_id);
-    
+
             if ($stmt->execute()) {
                 echo json_encode(['success' => true]);
             } else {
@@ -97,8 +105,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             exit;
         }
     }
-    
-    
 }
 
 // Query to fetch existing games
@@ -186,65 +192,81 @@ $result = $stmt->get_result();
 <div class="section-container">
     <!-- Add Game Form -->
     <div class="section">
-        <form method="POST" action="add_game.php">
-            <input type="hidden" name="action" value="add">
-            <label for="league_id">League ID:</label>
-            <select name="league_id" id="league_id" required>
-                <option value="">Select a League</option>
-                <?php
-                $league_stmt = $conn->prepare("SELECT league_id, league_name FROM league WHERE userid = '".$_SESSION['userId']."'");
-                $league_stmt->execute();
-                $league_result = $league_stmt->get_result();
-                while ($league = $league_result->fetch_assoc()) {
-                    echo "<option value='" . $league['league_id'] . "'>" . $league['league_name'] . "</option>";
-                }
-                ?>
-                </select>
+        <!-- Add Game Form -->
+<!-- Add Game Form -->
+<form method="POST" action="add_game.php">
+    <input type="hidden" name="action" value="add">
+    
+    <?php
+    if (isset($_SESSION['userId'])) {
+        $userId = $_SESSION['userId'];
 
-         
-            <!-- Dropdown for Home Club -->
-            <label for="home_club_id">Select a Home Club:</label>
-            <select name="home_club_id" id="home_club_id" required>
-                <option value="">--Select Club--</option>
-                <?php
-                // Loop through the result and create options for the dropdown
-                while ($row = $result->fetch_assoc()) {
-                    $club_id = htmlspecialchars($row['club_id']);
-                    $c_name = htmlspecialchars($row['c_name']);
-                    echo "<option value='$club_id'>$c_name</option>";
-                }
-                ?>
-            </select>
+        // Fetch the user's league
+        $league_stmt = $conn->prepare("SELECT league_id, league_name FROM league WHERE userId = ?");
+        $league_stmt->bind_param("i", $userId);
+        $league_stmt->execute();
+        $league_result = $league_stmt->get_result();
 
-            <!-- Dropdown for Away Club -->
-            <label for="away_club_id">Select an Away Club:</label>
-            <select name="away_club_id" id="away_club_id" required>
-                <option value="">--Select Club--</option>
-                <?php
-                // Loop through the result and create options for the dropdown
-                $result->data_seek(0);  // Reset pointer to start
-                while ($row = $result->fetch_assoc()) {
-                    $club_id = htmlspecialchars($row['club_id']);
-                    $c_name = htmlspecialchars($row['c_name']);
-                    echo "<option value='$club_id'>$c_name</option>";
-                }
-                ?>
-            </select>
+        if ($league = $league_result->fetch_assoc()) {
+            $league_id = htmlspecialchars($league['league_id'], ENT_QUOTES);
+            $league_name = htmlspecialchars($league['league_name'], ENT_QUOTES);
+        } else {
+            $league_name = "No league found"; // If the user has no league
+            $league_id = "";
+        }
+        $league_stmt->close();
+    }
+    ?>
 
-            <label for="date">Date:</label>
-            <input type="date" name="date" required>
+    <!-- Display the league name -->
+    <h3><?php echo $league_name; ?></h3>
 
-            <label for="time">Time:</label>
-            <input type="time" name="time" required>
+    <!-- Hidden input to store league_id -->
+    <input type="hidden" name="league_id" value="<?php echo $league_id; ?>">
 
-            <label for="score_home">Home Score:</label>
-            <input type="text" name="score_home">
+    <!-- Dropdown for Home Club -->
+    <label for="home_club_id">Select a Home Club:</label>
+    <select name="home_club_id" id="home_club_id" required>
+        <option value="">--Select Club--</option>
+        <?php
+        // Loop through the result and create options for the dropdown
+        while ($row = $result->fetch_assoc()) {
+            $club_id = htmlspecialchars($row['club_id']);
+            $c_name = htmlspecialchars($row['c_name']);
+            echo "<option value='$club_id'>$c_name</option>";
+        }
+        ?>
+    </select>
 
-            <label for="score_away">Away Score:</label>
-            <input type="text" name="score_away">
+    <!-- Dropdown for Away Club -->
+    <label for="away_club_id">Select an Away Club:</label>
+    <select name="away_club_id" id="away_club_id" required>
+        <option value="">--Select Club--</option>
+        <?php
+        // Loop through the result and create options for the dropdown
+        $result->data_seek(0);  // Reset pointer to start
+        while ($row = $result->fetch_assoc()) {
+            $club_id = htmlspecialchars($row['club_id']);
+            $c_name = htmlspecialchars($row['c_name']);
+            echo "<option value='$club_id'>$c_name</option>";
+        }
+        ?>
+    </select>
 
-            <input type="submit" value="Add Game">
-        </form>
+    <label for="date">Date:</label>
+    <input type="date" name="date" required>
+
+    <label for="time">Time:</label>
+    <input type="time" name="time" required>
+
+    <label for="score_home">Home Score:</label>
+    <input type="text" name="score_home" placeholder="Enter score or leave blank">
+
+    <label for="score_away">Away Score:</label>
+    <input type="text" name="score_away" placeholder="Enter score or leave blank">
+
+    <input type="submit" value="Add Game">
+</form>
     </div>
 </div>
 

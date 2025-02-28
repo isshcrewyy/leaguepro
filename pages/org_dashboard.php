@@ -76,7 +76,7 @@ $league = $league_result->fetch_assoc();
 
 <?php if (isset($_SESSION['status'])): ?> 
     <?php if ($_SESSION['status'] === 'approved'): ?>
-        <p style="color: green; font-weight: bold;">Your account is approved!</p> 
+      <p>Status : </p>  <p style="color: green; font-weight: bold;">Verified</p> 
     <?php else: ?>
         <p style="color: red; font-weight: bold;">Your account is pending approval.</p> 
     <?php endif; ?>
