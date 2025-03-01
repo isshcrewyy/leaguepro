@@ -46,6 +46,31 @@ $league = $league_result->fetch_assoc();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Waiting for approval</title>
     <link rel="stylesheet" href="../assests/css/dashboardstyle.css">
+    <style>
+        /* Center the Send Email link */
+.send-email-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+/* Style the Send Email link */
+.send-email-link {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #4CAF50; /* Green */
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.send-email-link:hover {
+    background-color: #45a049; /* Darker green */
+    transform: scale(1.05);
+}
+    </style>
 </head>
 <body>
     <h1>Waiting for approval</h1>
@@ -87,5 +112,11 @@ $league = $league_result->fetch_assoc();
             <?php endif; ?>
         </div>
     </div>
+    <div class="send-email-container">
+    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=diwas254@gmail.com&su=Please review my approval.&body= Approval message goes here =" target="_blank" class="send-email-link">
+        Send Email For Faster Response
+    </a>
+</div>
+
 </body>
 </html>
