@@ -147,7 +147,7 @@ if (isset($_SESSION['admin_id'])) {
         <h2>Admin Portal</h2>
 
         <?php if (!isset($_SESSION['admin_id'])): ?>
-            <!-- Registration Form -->
+            <!-- Registration Form 
             <h3>Register</h3>
             <form method="POST" action="">
                 <label>Name:</label>
@@ -168,6 +168,7 @@ if (isset($_SESSION['admin_id'])) {
             <hr>
             <h3>Already Registered?</h3>
             <h4>/</h4>
+            -->
             <!-- Login Form -->
             <h3>Login</h3>
             <form method="POST" action="">
