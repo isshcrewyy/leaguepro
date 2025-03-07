@@ -19,13 +19,15 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] !== 'approved') {
 $name = $_SESSION['name'];
 $userId = $_SESSION['userId'];
 
-// SQL query to fetch players and coaches with prepared statements
-$stmt_players = $conn->prepare("SELECT player_id, p_name, age, position, club_id, phone_number FROM player WHERE created_by = ?");
+//JOIN league l ON c.league_id = l.league_id 
+// SQL query to fetch players and coaches with prepared statements 
+$sql = "SELECT p.player_id, p.p_name, p.age, p.position, c.club_id AS c_id ,c.c_name AS c_name, p.phone_number FROM player p JOIN club c ON p.club_id = c.club_id WHERE p.created_by = ?;";
+$stmt_players = $conn->prepare($sql);
 $stmt_players->bind_param("s", $name);
 $stmt_players->execute();
 $players_result = $stmt_players->get_result();
 
-$stmt_coaches = $conn->prepare("SELECT coach_id, co_name, age, experience, club_id, phone_number FROM coach WHERE created_by = ?");
+$stmt_coaches = $conn->prepare("SELECT co.coach_id, co.co_name, co.age, co.experience, cl.club_id AS club_id, cl.c_name AS club_name, co.phone_number FROM coach co JOIN club cl ON co.club_id = cl.club_id WHERE co.created_by = ?");
 $stmt_coaches->bind_param("s", $name);
 $stmt_coaches->execute();
 $coaches_result = $stmt_coaches->get_result();
@@ -211,7 +213,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <th>Name</th>
                     <th>Age</th>
                     <th>Position</th>
-                    <th>Club ID</th>
+                    <th>Club Name</th>
                     <th>Phone Number</th>
                     <th>Action</th>
                 </tr>
@@ -233,8 +235,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <input type="text" class="edit-input" value="<?php echo htmlspecialchars($player['position']); ?>" style="display: none;">
             </td>
             <td>
-                <span class="display-value"><?php echo $player['club_id']; ?></span>
-                <input type="number" class="edit-input" value="<?php echo $player['club_id']; ?>" style="display: none;">
+                <span class="display-value"><?php echo $player['c_name']; ?></span>
+                <input type="number" class="edit-input" value="<?php echo $player['c_id']; ?>" style="display: none;">
             </td>
             <td>
                 <span class="display-value"><?php echo htmlspecialchars($player['phone_number']); ?></span>
@@ -268,7 +270,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <th>Name</th>
                     <th>Age</th>
                     <th>Experience</th>
-                    <th>Club ID</th>
+                    <th>Club Name</th>
                     <th>Phone Number</th>
                     <th>Action</th>
                 </tr>
@@ -290,7 +292,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <input type="number" class="edit-input" value="<?php echo $coach['experience']; ?>" style="display: none;">
             </td>
             <td>
-                <span class="display-value"><?php echo $coach['club_id']; ?></span>
+                <span class="display-value"><?php echo $coach['club_name']; ?></span>
                 <input type="number" class="edit-input" value="<?php echo $coach['club_id']; ?>" style="display: none;">
             </td>
             <td>

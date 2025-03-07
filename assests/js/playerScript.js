@@ -1,7 +1,8 @@
+let name= "";
 // JavaScript for switching tabs
 document.addEventListener("DOMContentLoaded", function () {
-    const addPlayerTab = document.getElementById("addPlayerTab");
-    const addCoachTab = document.getElementById("addCoachTab");
+    const addPlayerTab = document.getElementById("addPlayerTabBtn");
+    const addCoachTab = document.getElementById("addCoachTabBtn");
     const playerForm = document.getElementById("playerForm");
     const coachForm = document.getElementById("coachForm");
 
@@ -90,7 +91,7 @@ function saveChanges(button, type, id) {
     formData.append(type === 'player' ? 'position' : 'experience', values[2]);
     formData.append('club_id', values[3]);
     formData.append('phone_number', values[4]);
-
+    p_name = values[0];
     // Send AJAX request
     fetch('update_team.php', {
         method: 'POST',
@@ -101,16 +102,20 @@ function saveChanges(button, type, id) {
         if (data.success) {
             // Update display values
             const displayValues = row.getElementsByClassName('display-value');
+            
             Array.from(displayValues).forEach((span, index) => {
                 span.textContent = values[index];
             });
-            
             // Reset display
             cancelEdit(button, type, id);
-            alert('Updated successfully!');
+            alert('Updated !');
+            setTimeout(() => window.location.reload(), 500); // Ensure page reload
+            
+           
         } else {
             alert('Error updating: ' + data.message);
         }
+        
     })
     .catch(error => {
         console.error('Error:', error);

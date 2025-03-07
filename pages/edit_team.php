@@ -93,8 +93,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action']) && $_POST['
         <label for="position">Position:</label>
         <input type="text" name="position" value="<?php echo htmlspecialchars($player['position']); ?>" required><br><br>
 
-        <label for="club_id">Club ID:</label>
-        <input type="number" name="club_id" value="<?php echo htmlspecialchars($player['club_id']); ?>" required><br><br>
+        <label for="club_id">Club:</label>
+        <select name="club_id" required>
+            <option value="1">Club 1</option>
+        
+            <?php
+            // Fetch all clubs from the database
+            $query = "SELECT club_id, c_name FROM club";
+            $result = $conn->query($query);
+            if($result->num_rows > 0) {
+                while($row = $result->fetch_assoc()) {
+                    $selected = $player['club_id'] == $row['club_id'] ? 'selected' : '';
+                    echo '<option value="' . $row['club_id'] . '" ' . $selected . '>' . $row['c_name'] . '</option>';
+                }
+            }
+            ?>
+        </select>
+        
+        <!-- <input type="number" name="club_id" value="<?php echo htmlspecialchars($player['club_id']); ?>" required><br><br> -->
 
         <label for="phone_number">Phone Number:</label>
         <input type="text" name="phone_number" value="<?php echo htmlspecialchars($player['phone_number']); ?>" required><br><br>
