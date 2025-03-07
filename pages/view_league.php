@@ -47,6 +47,7 @@ if ($clubsResult && $clubsResult->num_rows > 0) {
 
 // Fetch Players for the selected Club (only if club_id is valid)
 $players = [];
+$coaches = [];
 if ($club_id > 0) {
     $clubQuery = "SELECT c_name, location FROM club WHERE club_id = $club_id";
     $clubResult = $conn->query($clubQuery);
@@ -60,27 +61,20 @@ if ($club_id > 0) {
                 $players[] = $player;
             }
         }
+
+                // Fetch Coaches for the selected Club
+        $coachesQuery = "SELECT co_name, age, experience FROM coach WHERE club_id = $club_id";
+        $coachesResult = $conn->query($coachesQuery);
+        if ($coachesResult && $coachesResult->num_rows > 0) {
+            while ($coach = $coachesResult->fetch_assoc()) {
+                $coaches[] = $coach;
+            }
+        }
     } else {
         echo "<p>Club not found.</p>";
     }
 }
 
-$coachs = [];
-if ($club_id > 0){
-    $clubQuery = "SELECT c_name, location FROM club WHERE club_id = $club_id";
-    $clubResult = $conn->query($clubQuery);
-    if ($clubResult && $clubResult->num_rows > 0) {
-        $club = $clubResult->fetch_assoc();
-
-        $coachsQuery = "SELECT co_name, age, experience FROM coach WHERE club_id = $club_id";
-        $coachsResult = $conn->query($coachsQuery);
-        if ($coachsResult && $coachsResult->num_rows > 0) {
-            while ($coach = $coachsResult->fetch_assoc()) {
-                $coachs[] = $coach;
-            }
-        }
-    }
-}
 
 // Fetch Leaderboard for the selected League
 $leaderboardQuery = "SELECT club_id, points, wins, losses, draws, goal_difference FROM leaderboard WHERE league_id = $league_id ORDER BY points DESC";
@@ -121,6 +115,7 @@ if ($matchesResult && $matchesResult->num_rows > 0) {
 
 $conn->close();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -156,8 +151,35 @@ $conn->close();
         function closePopup() {
             document.getElementById('player-popup').style.display = 'none';
         }
-    </script>
-    <script>
+
+        function showCoaches(clubId) {
+            // Fetch coaches via AJAX
+            fetch(`fetch_coaches.php?club_id=${clubId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const coachList = document.getElementById('coach-list');
+                    coachList.innerHTML = ''; // Clear existing content
+
+                    if (data.length === 0) {
+                        coachList.innerHTML = '<p>No coaches found for this club.</p>';
+                    } else {
+                        data.forEach(coach => {
+                            const coachItem = document.createElement('li');
+                            coachItem.textContent = `Name: ${coach.co_name}, Age: ${coach.age}, Experience: ${coach.experience} years`;
+                            coachList.appendChild(coachItem);
+                        });
+                    }
+
+                    // Show the popup
+                    document.getElementById('coach-popup').style.display = 'block';
+                })
+                .catch(error => console.error('Error fetching coaches:', error));
+        }
+
+        function closeCoachPopup() {
+            document.getElementById('coach-popup').style.display = 'none';
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             if (window.location.hash) {
                 const element = document.querySelector(window.location.hash);
@@ -167,7 +189,6 @@ $conn->close();
             }
         });
     </script>
-
 </head>
 <body>
 <div class="container">
@@ -180,8 +201,7 @@ $conn->close();
 
     <header>
         <div>
-            <h1>League Fixtures</h1>
-            <h2>League: <?php echo htmlspecialchars($league['league_name']); ?></h2>
+            <h1>League: <?php echo htmlspecialchars($league['league_name']); ?></h1>
         </div>
         <!-- Button Group -->
         <div class="button-group">
@@ -203,6 +223,7 @@ $conn->close();
                         <p>Location: <?php echo htmlspecialchars($club['location']); ?></p>
                         <div class="button-group">
                             <a href="javascript:void(0);" onclick="showPlayers(<?php echo $club['club_id']; ?>)">View Players</a>
+                            <a href="javascript:void(0);" onclick="showCoaches(<?php echo $club['club_id']; ?>)">View Coaches</a>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -210,12 +231,21 @@ $conn->close();
         </div>
     </section>
 
-    <!-- Popup Structure -->
+    <!-- Player Popup Structure -->
     <div id="player-popup" class="popup">
         <div class="popup-content">
             <span class="close" onclick="closePopup()">&times;</span>
             <h2>Players</h2>
             <ul id="player-list"></ul>
+        </div>
+    </div>
+
+    <!-- Coach Popup Structure -->
+    <div id="coach-popup" class="popup">
+        <div class="popup-content">
+            <span class="close" onclick="closeCoachPopup()">&times;</span>
+            <h2>Coaches</h2>
+            <ul id="coach-list"></ul>
         </div>
     </div>
 

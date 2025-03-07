@@ -305,7 +305,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <input type="hidden" name="action" value="remove">
                     <input type="hidden" name="type" value="coach"> 
                     <input type="hidden" name="id" value="<?php echo $coach['coach_id']; ?>">
-                    <input type="submit" value="Remove">
+                    <input type="submit" class="remove-button" value="Remove">
                 </form>
             </td>
         </tr>
@@ -338,7 +338,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <label for="position">Position *</label>
         <input type="text" id="position" name="position" placeholder="Forward, Wing, etc." required />
 
-        <label for="club_id">Club ID *</label>
+        <label for="club_id">Club  *</label>
         <select name="club_id" id="club_id" required>
             <option value="">Select Club</option>
             <?php
@@ -372,7 +372,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <label for="coach_age">Age *</label>
         <input type="number" id="coach_age" name="age" placeholder="Enter Age" required />
 
-        <label for="club_id_coach">Club ID *</label>
+        <label for="club_id_coach">Club  *</label>
         <select name="club_id" id="club_id_coach" required>
             <option value="">Select Club</option>
             <?php
