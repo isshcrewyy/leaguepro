@@ -235,8 +235,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <input type="text" class="edit-input" value="<?php echo htmlspecialchars($player['position']); ?>" style="display: none;">
             </td>
             <td>
-                <span class="display-value"><?php echo $player['c_name']; ?></span>
-                <input type="number" class="edit-input" value="<?php echo $player['c_id']; ?>" style="display: none;">
+                 <?php echo $player['c_name']; ?>
             </td>
             <td>
                 <span class="display-value"><?php echo htmlspecialchars($player['phone_number']); ?></span>
@@ -292,8 +291,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <input type="number" class="edit-input" value="<?php echo $coach['experience']; ?>" style="display: none;">
             </td>
             <td>
-                <span class="display-value"><?php echo $coach['club_name']; ?></span>
-                <input type="number" class="edit-input" value="<?php echo $coach['club_id']; ?>" style="display: none;">
+                <?php echo $coach['club_name']; ?>
             </td>
             <td>
                 <span class="display-value"><?php echo htmlspecialchars($coach['phone_number']); ?></span>

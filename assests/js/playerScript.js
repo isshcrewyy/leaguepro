@@ -89,9 +89,8 @@ function saveChanges(button, type, id) {
     formData.append('name', values[0]);
     formData.append('age', values[1]);
     formData.append(type === 'player' ? 'position' : 'experience', values[2]);
-    formData.append('club_id', values[3]);
-    formData.append('phone_number', values[4]);
-    p_name = values[0];
+    
+    formData.append('phone_number', values[3]);
     // Send AJAX request
     fetch('update_team.php', {
         method: 'POST',
@@ -108,8 +107,8 @@ function saveChanges(button, type, id) {
             });
             // Reset display
             cancelEdit(button, type, id);
-            alert('Updated !');
-            setTimeout(() => window.location.reload(), 500); // Ensure page reload
+            alert('Updated Successfully!');
+            window.location.reload()
             
            
         } else {

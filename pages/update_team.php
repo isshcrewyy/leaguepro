@@ -7,18 +7,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'];
     $name = $_POST['name'];
     $age = $_POST['age'];
-    $club_id = $_POST['club_id'];
     $phone_number = $_POST['phone_number'];
 
     try {
         if ($type === 'player') {
             $position = $_POST['position'];
-            $stmt = $conn->prepare("UPDATE player SET p_name=?, age=?, position=?, club_id=?, phone_number=? WHERE player_id=?");
-            $stmt->bind_param("sisisi", $name, $age, $position, $club_id, $phone_number, $id);
+            $stmt = $conn->prepare("UPDATE player SET p_name=?, age=?, position=?, phone_number=? WHERE player_id=?");
+            $stmt->bind_param("sisii", $name, $age, $position, $phone_number, $id);
         } else {
             $experience = $_POST['experience'];
-            $stmt = $conn->prepare("UPDATE coach SET co_name=?, age=?, experience=?, club_id=?, phone_number=? WHERE coach_id=?");
-            $stmt->bind_param("siisis", $name, $age, $experience, $club_id, $phone_number, $id);
+            $stmt = $conn->prepare("UPDATE coach SET co_name=?, age=?, experience=?, phone_number=? WHERE coach_id=?");
+            $stmt->bind_param("siiis", $name, $age, $experience, $phone_number, $id);
         }
 
         if ($stmt->execute()) {
