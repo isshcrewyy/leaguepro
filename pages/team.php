@@ -133,6 +133,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             echo "<script>alert('All required fields must be filled!'); window.history.back();</script>";
             exit();
         }
+        // Check if a coach already exists for the selected club
+    $stmt_check = $conn->prepare("SELECT COUNT(*) FROM coach WHERE club_id = ?");
+    $stmt_check->bind_param("i", $club_id);
+    $stmt_check->execute();
+    $stmt_check->bind_result($coach_count);
+    $stmt_check->fetch();
+    $stmt_check->close();
+
+    if ($coach_count > 0) {
+        echo "<script>alert('A coach already exists for this club. Only one coach is allowed per team.'); window.history.back();</script>";
+        exit();
+    }
+
 
         try {
             $stmt = $conn->prepare("INSERT INTO coach (co_name, experience, age, club_id, phone_number, created_by) VALUES (?, ?, ?, ?, ?, ?)");
